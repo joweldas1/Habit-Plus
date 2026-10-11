@@ -108,7 +108,13 @@ export const SettingsModal = ({ isOpen, onClose }) => {
         >
           <div className="space-y-1">
             <label className={`font-semibold block ${isNight ? 'text-zinc-300' : 'text-slate-700'}`}>{t.userName}</label>
-            <div className="flex space-x-2">
+            <div className="flex items-center space-x-2">
+              <div
+                title="Profile Avatar Preview"
+                className="w-9 h-9 rounded-xl bg-gradient-to-tr from-violet-600 to-indigo-500 text-white font-extrabold text-sm flex items-center justify-center shrink-0 shadow-md ring-1 ring-white/10 select-none uppercase"
+              >
+                {(nameInput.trim() || 'U').charAt(0).toUpperCase()}
+              </div>
               <input
                 type="text"
                 value={nameInput}

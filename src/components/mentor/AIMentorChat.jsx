@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useApp } from '../../context/AppContext';
 import { useToast } from '../../context/ToastContext';
 import { sendMentorMessage } from '../../services/geminiService';
@@ -10,7 +10,6 @@ import {
   Send,
   Sparkles,
   Bot,
-  User,
   GraduationCap,
   Compass,
   Flame,
@@ -19,6 +18,9 @@ import {
   ShieldCheck,
   ArrowRight,
 } from 'lucide-react';
+
+const generateMessageId = () => `msg_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+const getFormattedTimestamp = () => new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
 const MODE_CONFIG = {
   english: {
@@ -265,8 +267,14 @@ export const AIMentorChat = () => {
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef(null);
 
+  // Capitalized first letter of user name for profile avatar
+  const userInitial = (settings.name?.trim()?.charAt(0) || 'U').toUpperCase();
+
   // Active mode messages
-  const activeMessages = conversations[mode] || INITIAL_MESSAGES[mode] || [];
+  const activeMessages = useMemo(
+    () => conversations[mode] || INITIAL_MESSAGES[mode] || [],
+    [conversations, mode]
+  );
   const currentConfig = MODE_CONFIG[mode] || MODE_CONFIG.english;
 
   useEffect(() => {
@@ -278,10 +286,10 @@ export const AIMentorChat = () => {
     if (!text || loading) return;
 
     const userMsg = {
-      id: `msg_${Date.now()}`,
+      id: generateMessageId(),
       sender: 'user',
       text,
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      timestamp: getFormattedTimestamp(),
     };
 
     const targetMode = mode;
@@ -306,10 +314,10 @@ export const AIMentorChat = () => {
       );
 
       const mentorMsg = {
-        id: `msg_${Date.now() + 1}`,
+        id: generateMessageId(),
         sender: 'mentor',
         text: responseText,
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        timestamp: getFormattedTimestamp(),
       };
 
       setConversations((prev) => {
@@ -332,12 +340,12 @@ export const AIMentorChat = () => {
       );
 
       const errorMsg = {
-        id: `msg_${Date.now() + 1}`,
+        id: generateMessageId(),
         sender: 'mentor',
         text: isMissingKey
           ? '⚠️ Please add your Gemini API key in **Settings > Test AI Connection** or in `.env.local` to enable mentoring.'
           : `⚠️ ${err.message || 'Could not reach Gemini service. Please verify your keys in Settings.'}`,
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        timestamp: getFormattedTimestamp(),
       };
 
       setConversations((prev) => {
@@ -550,13 +558,20 @@ export const AIMentorChat = () => {
                   }`}
                 >
                   <div
-                    className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 text-xs shadow-md ${
+                    title={isUser ? (settings.name || 'You') : 'AI Mentor'}
+                    className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 text-xs shadow-md select-none transition-all ${
                       isUser
-                        ? 'bg-[#8B5CF6] text-white'
+                        ? 'bg-gradient-to-tr from-violet-600 to-indigo-500 text-white font-extrabold ring-1 ring-white/10'
                         : 'bg-zinc-800 text-[#38BDF8] border border-zinc-700'
                     }`}
                   >
-                    {isUser ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
+                    {isUser ? (
+                      <span className="font-extrabold text-xs uppercase leading-none">
+                        {userInitial}
+                      </span>
+                    ) : (
+                      <Bot className="w-4 h-4" />
+                    )}
                   </div>
 
                   <div
