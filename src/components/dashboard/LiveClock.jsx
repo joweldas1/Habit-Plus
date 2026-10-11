@@ -1,6 +1,5 @@
 import React from 'react';
 import { useApp } from '../../context/AppContext';
-import { timeToMinutes } from '../../utils/timeUtils';
 import {
   Clock,
   Calendar,
@@ -11,7 +10,6 @@ import {
   Moon,
   Sparkles,
   Zap,
-  Coffee,
 } from 'lucide-react';
 
 const CategorySymbol = ({ category, className }) => {
@@ -61,20 +59,10 @@ export const LiveClock = () => {
 
   const { time, ampm } = formatHours();
 
-  // Find active / running task
-  const nowMin = currentTime.getHours() * 60 + currentTime.getMinutes();
+  // Find active / running task for icon styling
   const activeTask = dailyTasks.find(
     (task) => task.status === 'active' || task.status === 'awaiting_done'
   );
-  const nextTask = !activeTask
-    ? dailyTasks.find((task) => task.status === 'upcoming')
-    : null;
-
-  let remainingMin = 0;
-  if (activeTask && activeTask.status === 'active') {
-    const endMin = timeToMinutes(activeTask.endTime);
-    remainingMin = Math.max(0, endMin - nowMin);
-  }
 
   return (
     <div
@@ -85,8 +73,8 @@ export const LiveClock = () => {
       }`}
     >
       <div className="flex items-center justify-between gap-3">
-        {/* Left Side: Dynamic Icon Box + Live Tracker & Running Task Pill */}
-        <div className="flex items-center space-x-3 min-w-0">
+        {/* Left Side: Dynamic Icon Box + Live Tracker & Time */}
+        <div className="flex items-center space-x-2.5 sm:space-x-3 min-w-0">
           <div className="relative shrink-0">
             <div
               className={`p-2.5 rounded-xl border transition-all duration-300 ${
@@ -104,109 +92,34 @@ export const LiveClock = () => {
               {activeTask ? (
                 <CategorySymbol
                   category={activeTask.category}
-                  className="w-5 h-5 animate-pulse"
+                  className="w-5 h-5"
                 />
               ) : (
-                <Clock className="w-5 h-5 animate-pulse" />
+                <Clock className="w-5 h-5" />
               )}
             </div>
-
-            {/* Pulsing Dot on Icon when task is active */}
-            {activeTask && (
-              <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span
-                  className={`relative inline-flex rounded-full h-2.5 w-2.5 ${
-                    activeTask.status === 'awaiting_done'
-                      ? 'bg-amber-500'
-                      : 'bg-emerald-500'
-                  }`}
-                ></span>
-              </span>
-            )}
           </div>
 
           <div className="min-w-0">
-            {/* Top row: LIVE TRACKER + Current Running Task Symbol Badge */}
-            <div className="flex items-center gap-2">
-              <span
-                className={`text-[11px] font-semibold uppercase tracking-wider shrink-0 ${
-                  isNight ? 'text-zinc-400' : 'text-slate-500'
-                }`}
-              >
-                Live Tracker
-              </span>
-
-              {/* Running task symbol badge */}
-              {activeTask ? (
-                <div
-                  className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold border transition-all ${
-                    activeTask.status === 'awaiting_done'
-                      ? 'bg-amber-500/15 border-amber-500/30 text-amber-300 animate-pulse'
-                      : isNight
-                        ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300'
-                        : 'bg-emerald-50 border-emerald-300 text-emerald-700 shadow-2xs'
-                  }`}
-                  title={`${activeTask.title} (${activeTask.startTime} - ${activeTask.endTime})`}
-                >
-                  <span className="relative flex h-1.5 w-1.5 shrink-0">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
-                  </span>
-                  <CategorySymbol
-                    category={activeTask.category}
-                    className="w-3 h-3 shrink-0"
-                  />
-                  <span className="truncate max-w-[110px] sm:max-w-[150px] md:max-w-[180px]">
-                    {activeTask.title}
-                  </span>
-                  {remainingMin > 0 && (
-                    <span className="text-[10px] opacity-75 font-mono font-normal">
-                      · {remainingMin}m left
-                    </span>
-                  )}
-                </div>
-              ) : nextTask ? (
-                <div
-                  className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium border ${
-                    isNight
-                      ? 'bg-zinc-800/60 border-zinc-700/60 text-zinc-400'
-                      : 'bg-slate-100 border-slate-200 text-slate-500'
-                  }`}
-                  title={`Next: ${nextTask.title}`}
-                >
-                  <CategorySymbol
-                    category={nextTask.category}
-                    className="w-3 h-3 opacity-70 shrink-0"
-                  />
-                  <span className="truncate max-w-[90px] sm:max-w-[130px]">
-                    Next: {nextTask.title}
-                  </span>
-                </div>
-              ) : (
-                <div
-                  className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium border ${
-                    isNight
-                      ? 'bg-zinc-800/40 border-zinc-800 text-zinc-500'
-                      : 'bg-slate-100 border-slate-200 text-slate-500'
-                  }`}
-                >
-                  <Coffee className="w-3 h-3 opacity-60 shrink-0" />
-                  <span>Free Time</span>
-                </div>
-              )}
-            </div>
+            {/* Top row: LIVE TRACKER */}
+            <span
+              className={`text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider block leading-none ${
+                isNight ? 'text-zinc-400' : 'text-slate-500'
+              }`}
+            >
+              Live Tracker
+            </span>
 
             {/* Bottom row: Digital Clock */}
-            <div className="flex items-baseline space-x-1.5 mt-0.5">
+            <div className="flex items-baseline space-x-1 mt-0.5">
               <span
-                className={`text-2xl font-bold tracking-tight tabular-nums ${
+                className={`text-2xl font-bold tracking-tight tabular-nums leading-none ${
                   isNight ? 'text-white' : 'text-slate-900'
                 }`}
               >
                 {time}
               </span>
-              <span className="text-xs font-bold text-violet-500 uppercase">{ampm}</span>
+              <span className="text-xs font-bold text-violet-500 uppercase leading-none">{ampm}</span>
             </div>
           </div>
         </div>
