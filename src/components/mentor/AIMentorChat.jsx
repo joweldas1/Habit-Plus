@@ -20,28 +20,125 @@ import {
   Lightbulb,
 } from 'lucide-react';
 
-const SUGGESTIONS = {
-  english: [
-    'Grade my draft: "I am trying to habituating myself for morning work."',
-    'Teach me 2 productivity idioms for professional speaking.',
-    'How do I politely decline distractions at work in English?',
-  ],
-  coaching: [
-    'How to prevent revenge bedtime procrastination after 10 PM?',
-    'What is habit stacking and how can I attach fitness to my day?',
-    'How do I maintain discipline during heavy travel days?',
-  ],
-  motivation: [
-    'I feel demotivated and want to skip my evening block.',
-    'Give me a stoic reality check on discipline vs fleeting motivation.',
-    'Remind me why consistency today compounds into massive results.',
-  ],
+const MODE_CONFIG = {
+  english: {
+    title: 'English Practice',
+    icon: GraduationCap,
+    placeholder: 'Paste or type your English text here for grammar, polish & grading...',
+    description: 'Fluency drills, grammar correction, sentence polish & constructive scoring.',
+    suggestions: [
+      'Grade my draft: "I am trying to habituate myself for morning work."',
+      'Teach me 2 productivity idioms for professional speaking.',
+      'How do I politely decline distractions at work in English?',
+    ],
+  },
+  coaching: {
+    title: 'Habit Coaching',
+    icon: Compass,
+    placeholder: 'Ask about habit stacking, routine planning, or daily consistency...',
+    description: 'Science-backed daily system design, atomic habit loops & friction reduction.',
+    suggestions: [
+      'How to prevent bedtime procrastination after 10 PM?',
+      'What is habit stacking and how do I attach workouts to my day?',
+      'How do I maintain discipline during busy work days?',
+    ],
+  },
+  motivation: {
+    title: 'Discipline Boost',
+    icon: Flame,
+    placeholder: 'Feeling demotivated or procrastinating? Ask for an instant focus boost...',
+    description: 'Stoic reality checks, energy restoration & anti-procrastination fuel.',
+    suggestions: [
+      'I feel demotivated and want to skip my evening task.',
+      'Give me a stoic reality check on discipline vs fleeting motivation.',
+      'Remind me why consistency today compounds into massive results.',
+    ],
+  },
 };
 
-const MODE_DESCRIPTIONS = {
-  english: 'Fluency drills, grammar correction, sentence polish & constructive scoring.',
-  coaching: 'Science-backed daily system design, atomic habit loops & friction reduction.',
-  motivation: 'Stoic reality checks, energy restoration & anti-procrastination fuel.',
+/**
+ * Formats AI / chat message text with rich HTML markup (no raw asterisks or markdown clutter)
+ */
+const FormattedMessage = ({ text, isNight, isUser }) => {
+  if (!text) return null;
+
+  const lines = text.split('\n');
+
+  return (
+    <div className="space-y-1 leading-relaxed">
+      {lines.map((line, lineIdx) => {
+        const trimmed = line.trim();
+        if (!trimmed) {
+          return <div key={lineIdx} className="h-1.5" />;
+        }
+
+        const isBullet = trimmed.startsWith('• ') || trimmed.startsWith('- ') || trimmed.startsWith('* ');
+        const textContent = isBullet ? trimmed.replace(/^[•\-*]\s+/, '') : line;
+
+        // Parse **bold** and `code`
+        const parts = [];
+        const regex = /(\*\*[^*]+\*\*|`[^`]+`)/g;
+        let lastIndex = 0;
+        let match;
+
+        while ((match = regex.exec(textContent)) !== null) {
+          if (match.index > lastIndex) {
+            parts.push(textContent.substring(lastIndex, match.index));
+          }
+          const token = match[0];
+          if (token.startsWith('**') && token.endsWith('**')) {
+            const inner = token.slice(2, -2);
+            parts.push(
+              <strong
+                key={match.index}
+                className={
+                  isUser
+                    ? 'font-bold text-white'
+                    : isNight
+                    ? 'font-bold text-white'
+                    : 'font-bold text-slate-900'
+                }
+              >
+                {inner}
+              </strong>
+            );
+          } else if (token.startsWith('`') && token.endsWith('`')) {
+            const inner = token.slice(1, -1);
+            parts.push(
+              <code
+                key={match.index}
+                className={`px-1.5 py-0.5 rounded font-mono text-[11px] ${
+                  isNight ? 'bg-zinc-800 text-violet-300' : 'bg-slate-200 text-violet-800'
+                }`}
+              >
+                {inner}
+              </code>
+            );
+          }
+          lastIndex = regex.lastIndex;
+        }
+
+        if (lastIndex < textContent.length) {
+          parts.push(textContent.substring(lastIndex));
+        }
+
+        if (isBullet) {
+          return (
+            <div key={lineIdx} className="flex items-start gap-2 pl-0.5">
+              <span
+                className={`w-1.5 h-1.5 rounded-full mt-2 shrink-0 ${
+                  isUser ? 'bg-white' : 'bg-violet-500'
+                }`}
+              />
+              <span className="flex-1">{parts.length > 0 ? parts : textContent}</span>
+            </div>
+          );
+        }
+
+        return <div key={lineIdx}>{parts.length > 0 ? parts : textContent}</div>;
+      })}
+    </div>
+  );
 };
 
 export const AIMentorChat = () => {
@@ -52,16 +149,17 @@ export const AIMentorChat = () => {
   const [mode, setMode] = useState('english'); // 'english' | 'coaching' | 'motivation'
   const [messages, setMessages] = useState(() => {
     const saved = getMentorMessages();
-    return saved.length
-      ? saved
-      : [
-          {
-            id: 'init-1',
-            sender: 'mentor',
-            text: `Welcome! I am your HabitPlus Mentor. Choose a mode on the left:\n• **English Practice**: Submit drafts for grading & polish\n• **Habit Coaching**: Science-backed daily systems\n• **Discipline Boost**: Stoic focus & anti-procrastination\n\nHow can I sharpen your discipline today?`,
-            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          },
-        ];
+    if (saved.length && saved[0].id !== 'init-1') {
+      return saved;
+    }
+    return [
+      {
+        id: 'init-1',
+        sender: 'mentor',
+        text: `Welcome! I am your HabitPlus Mentor.\n\nChoose a coaching mode above:\n• **English Practice**: Submit drafts for grammar, vocabulary & fluency polish\n• **Habit Coaching**: Science-backed daily systems & routine stacking\n• **Discipline Boost**: Stoic anti-procrastination fuel\n\nHow can I sharpen your discipline today?`,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      },
+    ];
   });
   const [inputText, setInputText] = useState('');
   const [loading, setLoading] = useState(false);
@@ -71,6 +169,8 @@ export const AIMentorChat = () => {
     saveMentorMessages(messages);
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  const currentConfig = MODE_CONFIG[mode] || MODE_CONFIG.english;
 
   const handleSend = async (textToSend = null) => {
     const text = (textToSend || inputText).trim();
@@ -183,63 +283,61 @@ export const AIMentorChat = () => {
                 Select Coaching Domain
               </span>
 
-              <div className="grid grid-cols-3 md:grid-cols-1 gap-2">
-                <button
-                  onClick={() => setMode('english')}
-                  className={`p-3 rounded-2xl border text-left transition-all ${
-                    mode === 'english'
-                      ? 'bg-purple-950/40 border-[#8B5CF6] text-white shadow-md'
-                      : isNight
-                      ? 'bg-[#141418] border-[#27272A] text-zinc-400 hover:border-zinc-700'
-                      : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300'
-                  }`}
-                >
-                  <div className="flex items-center space-x-2">
-                    <GraduationCap className="w-4 h-4 text-[#8B5CF6]" />
-                    <span className="font-bold text-xs sm:text-sm">{t.modeEnglish}</span>
-                  </div>
-                  <p className="hidden md:block text-[11px] text-zinc-400 mt-1">
-                    {MODE_DESCRIPTIONS.english}
-                  </p>
-                </button>
+              <div className="grid grid-cols-3 md:grid-cols-1 gap-2.5">
+                {Object.entries(MODE_CONFIG).map(([key, config]) => {
+                  const isSelected = mode === key;
+                  const Icon = config.icon;
 
-                <button
-                  onClick={() => setMode('coaching')}
-                  className={`p-3 rounded-2xl border text-left transition-all ${
-                    mode === 'coaching'
-                      ? 'bg-sky-950/40 border-[#38BDF8] text-white shadow-md'
-                      : isNight
-                      ? 'bg-[#141418] border-[#27272A] text-zinc-400 hover:border-zinc-700'
-                      : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300'
-                  }`}
-                >
-                  <div className="flex items-center space-x-2">
-                    <Compass className="w-4 h-4 text-[#38BDF8]" />
-                    <span className="font-bold text-xs sm:text-sm">{t.modeCoaching}</span>
-                  </div>
-                  <p className="hidden md:block text-[11px] text-zinc-400 mt-1">
-                    {MODE_DESCRIPTIONS.coaching}
-                  </p>
-                </button>
+                  let activeClass;
+                  if (isSelected) {
+                    if (key === 'english') {
+                      activeClass = isNight
+                        ? 'bg-violet-950/40 border-violet-500 text-white ring-1 ring-violet-500/40 shadow-sm'
+                        : 'bg-violet-600 border-violet-600 text-white shadow-sm';
+                    } else if (key === 'coaching') {
+                      activeClass = isNight
+                        ? 'bg-sky-950/40 border-sky-400 text-white ring-1 ring-sky-400/40 shadow-sm'
+                        : 'bg-sky-600 border-sky-600 text-white shadow-sm';
+                    } else {
+                      activeClass = isNight
+                        ? 'bg-amber-950/40 border-amber-500 text-white ring-1 ring-amber-500/40 shadow-sm'
+                        : 'bg-amber-600 border-amber-600 text-white shadow-sm';
+                    }
+                  } else {
+                    activeClass = isNight
+                      ? 'bg-[#141418] border-[#27272A] text-zinc-400 hover:border-zinc-700 hover:text-zinc-200'
+                      : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300 hover:bg-slate-50 shadow-2xs';
+                  }
 
-                <button
-                  onClick={() => setMode('motivation')}
-                  className={`p-3 rounded-2xl border text-left transition-all ${
-                    mode === 'motivation'
-                      ? 'bg-amber-950/40 border-amber-500 text-white shadow-md'
-                      : isNight
-                      ? 'bg-[#141418] border-[#27272A] text-zinc-400 hover:border-zinc-700'
-                      : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300'
-                  }`}
-                >
-                  <div className="flex items-center space-x-2">
-                    <Flame className="w-4 h-4 text-amber-500" />
-                    <span className="font-bold text-xs sm:text-sm">{t.modeMotivation}</span>
-                  </div>
-                  <p className="hidden md:block text-[11px] text-zinc-400 mt-1">
-                    {MODE_DESCRIPTIONS.motivation}
-                  </p>
-                </button>
+                  const iconColor = isSelected
+                    ? 'text-white'
+                    : key === 'english'
+                    ? 'text-violet-500'
+                    : key === 'coaching'
+                    ? 'text-sky-500'
+                    : 'text-amber-500';
+
+                  const subtitleColor = isSelected
+                    ? isNight ? 'text-zinc-300' : 'text-white/90'
+                    : isNight ? 'text-zinc-500' : 'text-slate-500';
+
+                  return (
+                    <button
+                      key={key}
+                      type="button"
+                      onClick={() => setMode(key)}
+                      className={`p-3 rounded-2xl border text-left transition-all duration-200 ${activeClass}`}
+                    >
+                      <div className="flex items-center space-x-2">
+                        <Icon className={`w-4 h-4 shrink-0 ${iconColor}`} />
+                        <span className="font-bold text-xs sm:text-sm">{config.title}</span>
+                      </div>
+                      <p className={`hidden md:block text-[11px] mt-1 leading-snug ${subtitleColor}`}>
+                        {config.description}
+                      </p>
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
@@ -247,10 +345,10 @@ export const AIMentorChat = () => {
             <div className="hidden md:block space-y-2">
               <span className="text-xs font-semibold uppercase tracking-wider text-zinc-400 px-1 flex items-center gap-1.5">
                 <Lightbulb className="w-3.5 h-3.5 text-amber-400" />
-                Prompt Ideas
+                Prompt Ideas for {currentConfig.title}
               </span>
               <div className="space-y-1.5">
-                {(SUGGESTIONS[mode] || []).map((prompt, i) => (
+                {currentConfig.suggestions.map((prompt, i) => (
                   <button
                     key={i}
                     onClick={() => handleSend(prompt)}
@@ -310,7 +408,7 @@ export const AIMentorChat = () => {
                         : 'bg-slate-100 border border-slate-200 text-slate-800 rounded-tl-sm'
                     }`}
                   >
-                    <div className="whitespace-pre-wrap">{m.text}</div>
+                    <FormattedMessage text={m.text} isNight={isNight} isUser={isUser} />
                     <span className="text-[10px] opacity-60 block mt-1.5 text-right font-mono">
                       {m.timestamp}
                     </span>
@@ -329,20 +427,33 @@ export const AIMentorChat = () => {
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Mobile-only Prompt Carousel (hidden on md+) */}
-          <div className="md:hidden px-3 py-2 border-t border-zinc-800/40 overflow-x-auto flex space-x-2 no-scrollbar">
-            {(SUGGESTIONS[mode] || []).map((prompt, i) => (
+          {/* Quick Suggestion Chips (Visible on ALL devices right above input) */}
+          <div
+            className={`px-3 py-2 border-t flex items-center gap-2 overflow-x-auto no-scrollbar transition-colors ${
+              isNight ? 'bg-[#16161D] border-zinc-800' : 'bg-slate-50 border-slate-200'
+            }`}
+          >
+            <span className="text-[10px] uppercase font-bold tracking-wider text-zinc-500 shrink-0 flex items-center gap-1">
+              <Lightbulb className="w-3 h-3 text-amber-400" />
+              {currentConfig.title}:
+            </span>
+            {currentConfig.suggestions.map((prompt, i) => (
               <button
                 key={i}
+                type="button"
                 onClick={() => handleSend(prompt)}
-                className="text-[11px] font-medium whitespace-nowrap px-3 py-1.5 rounded-full bg-zinc-800/60 hover:bg-zinc-800 text-zinc-300 border border-zinc-700/60 shrink-0"
+                className={`text-[11px] font-medium whitespace-nowrap px-3 py-1 rounded-full border shrink-0 transition-all active:scale-95 ${
+                  isNight
+                    ? 'bg-zinc-800/80 hover:bg-zinc-700/80 text-zinc-300 border-zinc-700/70 hover:text-white'
+                    : 'bg-white hover:bg-slate-100 text-slate-700 border-slate-200 shadow-2xs hover:border-slate-300'
+                }`}
               >
                 {prompt}
               </button>
             ))}
           </div>
 
-          {/* Message Input Box */}
+          {/* Message Input Box with Mode-Adaptive Dynamic Placeholder */}
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -356,12 +467,12 @@ export const AIMentorChat = () => {
               type="text"
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
-              placeholder={t.mentorPlaceholder}
+              placeholder={currentConfig.placeholder}
               disabled={loading}
               className={`flex-1 px-4 py-3 rounded-xl text-xs sm:text-sm focus:outline-none transition-colors ${
                 isNight
-                  ? 'bg-zinc-900 border border-zinc-700 text-white focus:border-[#8B5CF6]'
-                  : 'bg-white border border-slate-300 text-slate-900 focus:border-[#8B5CF6]'
+                  ? 'bg-zinc-900 border border-zinc-700 text-white placeholder-zinc-500 focus:border-[#8B5CF6]'
+                  : 'bg-white border border-slate-300 text-slate-900 placeholder-slate-400 focus:border-[#8B5CF6]'
               }`}
             />
 
