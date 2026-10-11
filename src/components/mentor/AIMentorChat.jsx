@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useApp } from '../../context/AppContext';
 import { useToast } from '../../context/ToastContext';
-import { sendMentorMessage } from '../../services/geminiService';
+import { sendMentorMessage, getApiKeys } from '../../services/geminiService';
 import {
   getMentorMessages,
   saveMentorMessages,
@@ -17,6 +17,7 @@ import {
   Loader2,
   ShieldCheck,
   ArrowRight,
+  Key,
 } from 'lucide-react';
 
 const generateMessageId = () => `msg_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
@@ -240,9 +241,10 @@ const FormattedMessage = ({ text, isNight, isUser }) => {
 };
 
 export const AIMentorChat = () => {
-  const { settings, t } = useApp();
+  const { settings, t, setIsAIConnectionTestOpen } = useApp();
   const { showToast } = useToast();
   const isNight = settings.theme === 'night';
+  const hasApiKey = Boolean(getApiKeys().primary);
 
   const [mode, setMode] = useState('english'); // 'english' | 'coaching' | 'motivation'
 
@@ -333,10 +335,10 @@ export const AIMentorChat = () => {
       });
     } catch (err) {
       console.error('Mentor error:', err);
-      const isMissingKey = err.message?.includes('No Gemini API key');
+      const isMissingKey = err.message?.includes('No Gemini API key') || !getApiKeys().primary;
       showToast(
         isMissingKey
-          ? 'Gemini API key needed. Please test/configure keys in Settings.'
+          ? (settings.language === 'bn' ? 'জেমিনি API Key প্রয়োজন। Key দিন বাটনে ক্লিক করুন।' : 'Gemini API key needed. Click Enter Key to connect.')
           : 'AI is temporarily unavailable. Check connection or try another key in Settings.',
         'error',
         5000
@@ -346,7 +348,9 @@ export const AIMentorChat = () => {
         id: generateMessageId(),
         sender: 'mentor',
         text: isMissingKey
-          ? '⚠️ Please add your Gemini API key in **Settings > Test AI Connection** or in `.env.local` to enable mentoring.'
+          ? (settings.language === 'bn'
+              ? '⚠️ **Gemini API Key সেট করা নেই!**\n\nলাইভ সাইটে AI চ্যাট করতে উপরের **"Key দিন 🔑"** বাটনে অথবা **Settings > Test AI Connection**-এ ক্লিক করে আপনার গুগল এআই স্টুডিও API Key পেস্ট করুন।'
+              : '⚠️ **Gemini API Key is not set!**\n\nTo enable AI chat on this live site, click **"Enter Key 🔑"** above or go to **Settings > Test AI Connection** and paste your Google AI Studio API key.')
           : `⚠️ ${err.message || 'Could not reach Gemini service. Please verify your keys in Settings.'}`,
         timestamp: getFormattedTimestamp(),
       };
@@ -548,6 +552,31 @@ export const AIMentorChat = () => {
               {activeMessages.length} {activeMessages.length === 1 ? 'message' : 'messages'}
             </span>
           </div>
+
+          {/* Missing API Key Setup Banner */}
+          {!hasApiKey && (
+            <div
+              className={`px-3 py-2 border-b flex items-center justify-between gap-2 text-xs transition-colors shrink-0 ${
+                isNight ? 'bg-amber-500/10 border-amber-500/25 text-amber-300' : 'bg-amber-50 border-amber-200 text-amber-900'
+              }`}
+            >
+              <div className="flex items-center gap-2 min-w-0">
+                <Key className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                <span className="truncate text-[10.5px] sm:text-xs">
+                  {settings.language === 'bn'
+                    ? 'লাইভ সাইটে AI চ্যাট করতে জেমিনি API Key দিন।'
+                    : 'Gemini API Key required to chat with AI.'}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsAIConnectionTestOpen(true)}
+                className="px-2.5 py-1 rounded-lg bg-amber-500 hover:bg-amber-400 text-black font-bold whitespace-nowrap active:scale-95 transition-all text-[11px] shrink-0 shadow-sm"
+              >
+                {settings.language === 'bn' ? 'Key দিন 🔑' : 'Enter Key 🔑'}
+              </button>
+            </div>
+          )}
 
           {/* Messages Scroll Area for this specific mode */}
           <div ref={messagesContainerRef} className="flex-1 min-h-0 p-2.5 sm:p-4 overflow-y-auto space-y-2.5 sm:space-y-3.5">

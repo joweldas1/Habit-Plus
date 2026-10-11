@@ -1,30 +1,34 @@
 // Robust Gemini API Service with Dual-Key Fallback, Model Discovery, and Strict Context Enforcement
 
 const CANDIDATE_MODELS = [
-  'gemini-3.8-flash',
-  'gemini-3.5-flash',
-  'gemini-3.7-flash',
-  'gemini-3.6-flash',
   'gemini-flash-latest',
   'gemini-flash-lite-latest',
+  'gemini-3.5-flash',
+  'gemini-3.8-flash',
+  'gemini-2.0-flash',
+  'gemini-1.5-flash',
   'gemini-pro-latest',
   'gemini-2.5-flash',
 ];
-
-const getEnvKey = (name) => {
-  try {
-    return import.meta.env[name] || '';
-  } catch {
-    return '';
-  }
-};
 
 const DEFAULT_PRIMARY = '';
 const DEFAULT_SECONDARY = '';
 
 export const getApiKeys = () => {
-  const primaryEnv = getEnvKey('VITE_GEMINI_KEY_PRIMARY');
-  const secondaryEnv = getEnvKey('VITE_GEMINI_KEY_SECONDARY');
+  // Directly access environment variables statically so Vite bakes them in during production build
+  const primaryEnv =
+    import.meta.env.VITE_GEMINI_KEY_PRIMARY ||
+    import.meta.env.VITE_GEMINI_API_KEY ||
+    import.meta.env.VITE_GEMINI_KEY ||
+    import.meta.env.VITE_GOOGLE_API_KEY ||
+    import.meta.env.VITE_API_KEY ||
+    import.meta.env.GEMINI_API_KEY ||
+    '';
+
+  const secondaryEnv =
+    import.meta.env.VITE_GEMINI_KEY_SECONDARY ||
+    import.meta.env.VITE_GEMINI_KEY_BACKUP ||
+    '';
   
   // Also check if user set overrides in localStorage
   let stored = {};
@@ -154,7 +158,7 @@ export async function executeGeminiWithFallback(systemInstruction, userPrompt, j
 
   let lastError = null;
   let attemptCount = 0;
-  const MAX_TOTAL_ATTEMPTS = 5; // Safety rule Section 16
+  const MAX_TOTAL_ATTEMPTS = 10;
 
   for (const { keyType, key, models } of keyAttempts) {
     for (const model of models) {

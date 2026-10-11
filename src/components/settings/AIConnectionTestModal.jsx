@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Modal } from '../common/Modal';
 import {
   testAIConnections,
@@ -13,6 +13,7 @@ import {
   RefreshCw,
   Key,
   Shield,
+  ExternalLink,
 } from 'lucide-react';
 
 export const AIConnectionTestModal = ({ isOpen, onClose }) => {
@@ -24,9 +25,20 @@ export const AIConnectionTestModal = ({ isOpen, onClose }) => {
   const [results, setResults] = useState(null);
   const [showKeyInputs, setShowKeyInputs] = useState(false);
 
-  const existingKeys = getApiKeys();
-  const [primaryKeyInput, setPrimaryKeyInput] = useState(existingKeys.primary || '');
-  const [secondaryKeyInput, setSecondaryKeyInput] = useState(existingKeys.secondary || '');
+  const [primaryKeyInput, setPrimaryKeyInput] = useState('');
+  const [secondaryKeyInput, setSecondaryKeyInput] = useState('');
+
+  useEffect(() => {
+    if (isOpen) {
+      const keys = getApiKeys();
+      setPrimaryKeyInput(keys.primary || '');
+      setSecondaryKeyInput(keys.secondary || '');
+      // Automatically show key inputs if no primary key exists
+      if (!keys.primary) {
+        setShowKeyInputs(true);
+      }
+    }
+  }, [isOpen]);
 
   const handleRunDiagnostic = async () => {
     setTesting(true);
@@ -43,7 +55,7 @@ export const AIConnectionTestModal = ({ isOpen, onClose }) => {
 
   const handleSaveKeys = () => {
     saveCustomApiKeys(primaryKeyInput.trim(), secondaryKeyInput.trim());
-    showToast('API keys saved. Running test...', 'success');
+    showToast('API keys saved! Running diagnostic...', 'success');
     handleRunDiagnostic();
   };
 
@@ -163,24 +175,42 @@ export const AIConnectionTestModal = ({ isOpen, onClose }) => {
           </div>
         )}
 
-        {/* Toggle Manual API Key Input for Local Testing */}
-        <div className="pt-2">
+        {/* Manual API Key Input for Live Deploys & Browser Storage */}
+        <div className="pt-2 border-t border-zinc-800/60">
           <button
             type="button"
             onClick={() => setShowKeyInputs(!showKeyInputs)}
-            className="text-[11px] text-purple-400 hover:text-purple-300 font-medium flex items-center gap-1"
+            className="text-xs text-violet-400 hover:text-violet-300 font-semibold flex items-center justify-between w-full py-1"
           >
-            <Key className="w-3.5 h-3.5" />
-            <span>{showKeyInputs ? 'Hide Key Setup' : 'Configure Custom API Keys in Browser'}</span>
+            <span className="flex items-center gap-1.5">
+              <Key className="w-4 h-4 text-violet-400" />
+              <span>{showKeyInputs ? 'Hide API Key Setup' : 'Enter / Update Gemini API Key'}</span>
+            </span>
+            <span className="text-[11px] text-zinc-500 underline">
+              {showKeyInputs ? 'Collapse' : 'Configure Key'}
+            </span>
           </button>
 
           {showKeyInputs && (
-            <div className={`mt-3 space-y-3 p-3.5 rounded-xl border animate-in fade-in ${
+            <div className={`mt-2.5 space-y-3 p-3.5 rounded-xl border animate-in fade-in ${
               isNight ? 'bg-zinc-900 border-zinc-800' : 'bg-slate-50 border-slate-200'
             }`}>
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] text-zinc-400">Don't have a Gemini API key yet?</span>
+                <a
+                  href="https://aistudio.google.com/app/apikey"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-[11px] font-semibold text-violet-400 hover:text-violet-300 hover:underline"
+                >
+                  <span>Get Free Key (Google)</span>
+                  <ExternalLink className="w-3 h-3" />
+                </a>
+              </div>
+
               <div className="space-y-1">
                 <label className={`text-[11px] font-semibold ${isNight ? 'text-zinc-300' : 'text-slate-700'}`}>
-                  Primary Key (Google AI Studio)
+                  Primary Gemini API Key
                 </label>
                 <input
                   type="password"
@@ -193,17 +223,20 @@ export const AIConnectionTestModal = ({ isOpen, onClose }) => {
                       : 'bg-white border-slate-300 text-slate-900 focus:border-violet-600'
                   }`}
                 />
+                <p className="text-[10px] text-zinc-500">
+                  Starts with <code className="font-mono text-zinc-400">AIzaSy...</code>. Saved securely in this browser's LocalStorage.
+                </p>
               </div>
 
               <div className="space-y-1">
                 <label className={`text-[11px] font-semibold ${isNight ? 'text-zinc-300' : 'text-slate-700'}`}>
-                  Secondary Key (Google Cloud)
+                  Secondary Backup Key (Optional)
                 </label>
                 <input
                   type="password"
                   value={secondaryKeyInput}
                   onChange={(e) => setSecondaryKeyInput(e.target.value)}
-                  placeholder="AIzaSy..."
+                  placeholder="AIzaSy... (optional backup key)"
                   className={`w-full px-3 py-2 rounded-lg border text-xs focus:outline-none transition-colors ${
                     isNight
                       ? 'bg-black border-zinc-700 text-white focus:border-violet-500'
@@ -212,17 +245,36 @@ export const AIConnectionTestModal = ({ isOpen, onClose }) => {
                 />
               </div>
 
-              <button
-                type="button"
-                onClick={handleSaveKeys}
-                className={`w-full py-2 rounded-lg font-semibold text-xs shadow-sm transition-colors ${
-                  isNight
-                    ? 'bg-violet-600 hover:bg-violet-500 text-white'
-                    : 'bg-slate-900 hover:bg-slate-800 text-white'
-                }`}
-              >
-                Save Keys & Re-Test
-              </button>
+              <div className="pt-1 flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleSaveKeys}
+                  className={`flex-1 py-2.5 rounded-lg font-semibold text-xs shadow-sm transition-all active:scale-95 ${
+                    isNight
+                      ? 'bg-violet-600 hover:bg-violet-500 text-white'
+                      : 'bg-slate-900 hover:bg-slate-800 text-white'
+                  }`}
+                >
+                  Save Key & Connect AI
+                </button>
+
+                {(primaryKeyInput || secondaryKeyInput) && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      saveCustomApiKeys('', '');
+                      setPrimaryKeyInput('');
+                      setSecondaryKeyInput('');
+                      showToast('Custom keys cleared.', 'info');
+                    }}
+                    className={`px-3 py-2.5 rounded-lg text-xs font-semibold border transition-colors ${
+                      isNight ? 'border-zinc-700 text-zinc-400 hover:text-white' : 'border-slate-300 text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
             </div>
           )}
         </div>
