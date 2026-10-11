@@ -136,18 +136,20 @@ export const saveStreakData = (streakData) => {
   }
 };
 
-export const getMentorMessages = () => {
+export const getMentorMessages = (mode = null) => {
   try {
-    const raw = localStorage.getItem(KEYS.CHAT_MESSAGES);
+    const key = mode ? `${KEYS.CHAT_MESSAGES}_${mode}` : KEYS.CHAT_MESSAGES;
+    const raw = localStorage.getItem(key);
     return raw ? JSON.parse(raw) : [];
   } catch {
     return [];
   }
 };
 
-export const saveMentorMessages = (msgs) => {
+export const saveMentorMessages = (msgs, mode = null) => {
   try {
-    localStorage.setItem(KEYS.CHAT_MESSAGES, JSON.stringify(msgs));
+    const key = mode ? `${KEYS.CHAT_MESSAGES}_${mode}` : KEYS.CHAT_MESSAGES;
+    localStorage.setItem(key, JSON.stringify(msgs));
   } catch {
     // ignore
   }

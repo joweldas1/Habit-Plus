@@ -17,7 +17,6 @@ import {
   Trash2,
   Loader2,
   ShieldCheck,
-  Lightbulb,
   ArrowRight,
 } from 'lucide-react';
 
@@ -25,6 +24,7 @@ const MODE_CONFIG = {
   english: {
     title: 'English Practice',
     icon: GraduationCap,
+    badgeColor: 'violet',
     placeholder: 'Paste or type your English text here for grammar, polish & grading...',
     description: 'Fluency drills, grammar correction, sentence polish & constructive scoring.',
     suggestions: [
@@ -45,6 +45,7 @@ const MODE_CONFIG = {
   coaching: {
     title: 'Habit Coaching',
     icon: Compass,
+    badgeColor: 'sky',
     placeholder: 'Ask about habit stacking, routine planning, or daily consistency...',
     description: 'Science-backed daily system design, atomic habit loops & friction reduction.',
     suggestions: [
@@ -65,6 +66,7 @@ const MODE_CONFIG = {
   motivation: {
     title: 'Discipline Boost',
     icon: Flame,
+    badgeColor: 'amber',
     placeholder: 'Feeling demotivated or procrastinating? Ask for an instant focus boost...',
     description: 'Stoic reality checks, energy restoration & anti-procrastination fuel.',
     suggestions: [
@@ -84,8 +86,35 @@ const MODE_CONFIG = {
   },
 };
 
+const INITIAL_MESSAGES = {
+  english: [
+    {
+      id: 'init-english',
+      sender: 'mentor',
+      text: `Welcome to **English Practice**! 🎓\n\nI am your AI English Coach. Submit your written drafts, daily reflections, or practice conversations here.\n\nI will review your grammar, introduce advanced vocabulary, and help you speak and write with natural confidence. How can I help you today?`,
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    },
+  ],
+  coaching: [
+    {
+      id: 'init-coaching',
+      sender: 'mentor',
+      text: `Welcome to **Habit Coaching**! 🧭\n\nI am your Daily Routine Architect. Here we design frictionless daily systems, atomic habit loops, and routines tailored to your lifestyle.\n\nWhat habit or routine challenge would you like to solve today?`,
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    },
+  ],
+  motivation: [
+    {
+      id: 'init-motivation',
+      sender: 'mentor',
+      text: `Welcome to **Discipline Boost**! 🔥\n\nI am your Stoic Accountability Partner. When procrastination strikes, resistance is high, or motivation fades, come here for immediate mental clarity.\n\nWhat is holding you back right now?`,
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    },
+  ],
+};
+
 /**
- * Formats AI / chat message text with rich HTML markup (no raw asterisks or markdown clutter)
+ * Formats AI / chat message text with rich HTML markup (handles headers, dividers, bold, code, bullets)
  */
 const FormattedMessage = ({ text, isNight, isUser }) => {
   if (!text) return null;
@@ -93,19 +122,51 @@ const FormattedMessage = ({ text, isNight, isUser }) => {
   const lines = text.split('\n');
 
   return (
-    <div className="space-y-1 leading-relaxed">
+    <div className="space-y-1.5 leading-relaxed">
       {lines.map((line, lineIdx) => {
         const trimmed = line.trim();
         if (!trimmed) {
-          return <div key={lineIdx} className="h-1.5" />;
+          return <div key={lineIdx} className="h-1" />;
         }
 
+        // Horizontal divider (---, ***, ___)
+        if (/^[-*_]{3,}$/.test(trimmed)) {
+          return (
+            <div
+              key={lineIdx}
+              className={`my-2 border-t ${
+                isNight ? 'border-zinc-800' : 'border-slate-200'
+              }`}
+            />
+          );
+        }
+
+        // Markdown Headers (###, ##, #)
+        if (/^#{1,4}\s+/.test(trimmed)) {
+          const headerText = trimmed.replace(/^#{1,4}\s+/, '');
+          return (
+            <h4
+              key={lineIdx}
+              className={`font-bold text-xs sm:text-sm tracking-tight pt-1.5 pb-0.5 ${
+                isUser
+                  ? 'text-white'
+                  : isNight
+                  ? 'text-violet-300'
+                  : 'text-violet-700'
+              }`}
+            >
+              {headerText}
+            </h4>
+          );
+        }
+
+        // Bullet list item
         const isBullet = trimmed.startsWith('• ') || trimmed.startsWith('- ') || trimmed.startsWith('* ');
         const textContent = isBullet ? trimmed.replace(/^[•\-*]\s+/, '') : line;
 
-        // Parse **bold** and `code`
+        // Parse **bold**, *italic* and `code`
         const parts = [];
-        const regex = /(\*\*[^*]+\*\*|`[^`]+`)/g;
+        const regex = /(\*\*[^\n*]+\*\*|\*[^\n*]+\*|`[^\n`]+`)/g;
         let lastIndex = 0;
         let match;
 
@@ -129,6 +190,13 @@ const FormattedMessage = ({ text, isNight, isUser }) => {
               >
                 {inner}
               </strong>
+            );
+          } else if (token.startsWith('*') && token.endsWith('*')) {
+            const inner = token.slice(1, -1);
+            parts.push(
+              <em key={match.index} className="italic opacity-90">
+                {inner}
+              </em>
             );
           } else if (token.startsWith('`') && token.endsWith('`')) {
             const inner = token.slice(1, -1);
@@ -175,30 +243,35 @@ export const AIMentorChat = () => {
   const isNight = settings.theme === 'night';
 
   const [mode, setMode] = useState('english'); // 'english' | 'coaching' | 'motivation'
-  const [messages, setMessages] = useState(() => {
-    const saved = getMentorMessages();
-    if (saved.length && saved[0].id !== 'init-1') {
-      return saved;
-    }
-    return [
-      {
-        id: 'init-1',
-        sender: 'mentor',
-        text: `Welcome! I am your HabitPlus Mentor.\n\nChoose a coaching mode above:\n• **English Practice**: Submit drafts for grammar, vocabulary & fluency polish\n• **Habit Coaching**: Science-backed daily systems & routine stacking\n• **Discipline Boost**: Stoic anti-procrastination fuel\n\nHow can I sharpen your discipline today?`,
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      },
-    ];
+
+  // 3 independent conversation histories for 3 modes
+  const [conversations, setConversations] = useState(() => {
+    const loadModeMessages = (m) => {
+      const saved = getMentorMessages(m);
+      if (saved && saved.length) {
+        return saved;
+      }
+      return INITIAL_MESSAGES[m] || [];
+    };
+
+    return {
+      english: loadModeMessages('english'),
+      coaching: loadModeMessages('coaching'),
+      motivation: loadModeMessages('motivation'),
+    };
   });
+
   const [inputText, setInputText] = useState('');
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef(null);
 
-  useEffect(() => {
-    saveMentorMessages(messages);
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
-
+  // Active mode messages
+  const activeMessages = conversations[mode] || INITIAL_MESSAGES[mode] || [];
   const currentConfig = MODE_CONFIG[mode] || MODE_CONFIG.english;
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [activeMessages]);
 
   const handleSend = async (textToSend = null) => {
     const text = (textToSend || inputText).trim();
@@ -211,15 +284,24 @@ export const AIMentorChat = () => {
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     };
 
-    setMessages((prev) => [...prev, userMsg]);
+    const targetMode = mode;
+    const previousList = conversations[targetMode] || [];
+    const updatedWithUser = [...previousList, userMsg];
+
+    setConversations((prev) => ({
+      ...prev,
+      [targetMode]: updatedWithUser,
+    }));
+    saveMentorMessages(updatedWithUser, targetMode);
+
     setInputText('');
     setLoading(true);
 
     try {
       const responseText = await sendMentorMessage(
-        mode,
+        targetMode,
         text,
-        messages,
+        updatedWithUser,
         settings.language || 'en'
       );
 
@@ -230,7 +312,14 @@ export const AIMentorChat = () => {
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       };
 
-      setMessages((prev) => [...prev, mentorMsg]);
+      setConversations((prev) => {
+        const nextList = [...(prev[targetMode] || []), mentorMsg];
+        saveMentorMessages(nextList, targetMode);
+        return {
+          ...prev,
+          [targetMode]: nextList,
+        };
+      });
     } catch (err) {
       console.error('Mentor error:', err);
       const isMissingKey = err.message?.includes('No Gemini API key');
@@ -242,33 +331,37 @@ export const AIMentorChat = () => {
         5000
       );
 
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: `msg_${Date.now() + 1}`,
-          sender: 'mentor',
-          text: isMissingKey
-            ? '⚠️ Please add your Gemini API key in **Settings > Test AI Connection** or in `.env.local` to enable mentoring.'
-            : `⚠️ ${err.message || 'Could not reach Gemini service. Please verify your keys in Settings.'}`,
-          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        },
-      ]);
+      const errorMsg = {
+        id: `msg_${Date.now() + 1}`,
+        sender: 'mentor',
+        text: isMissingKey
+          ? '⚠️ Please add your Gemini API key in **Settings > Test AI Connection** or in `.env.local` to enable mentoring.'
+          : `⚠️ ${err.message || 'Could not reach Gemini service. Please verify your keys in Settings.'}`,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      };
+
+      setConversations((prev) => {
+        const nextList = [...(prev[targetMode] || []), errorMsg];
+        saveMentorMessages(nextList, targetMode);
+        return {
+          ...prev,
+          [targetMode]: nextList,
+        };
+      });
     } finally {
       setLoading(false);
     }
   };
 
   const handleClear = () => {
-    const resetList = [
-      {
-        id: 'init-1',
-        sender: 'mentor',
-        text: 'Chat history cleared. What habit or skill are we training next?',
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      },
-    ];
-    setMessages(resetList);
-    saveMentorMessages(resetList);
+    const targetMode = mode;
+    const resetList = INITIAL_MESSAGES[targetMode] || [];
+    setConversations((prev) => ({
+      ...prev,
+      [targetMode]: resetList,
+    }));
+    saveMentorMessages(resetList, targetMode);
+    showToast(`${currentConfig.title} conversation reset.`, 'info');
   };
 
   return (
@@ -297,7 +390,7 @@ export const AIMentorChat = () => {
 
                 <button
                   onClick={handleClear}
-                  title={t.clearChat}
+                  title={`${t.clearChat} (${currentConfig.title})`}
                   className="p-2 rounded-xl text-zinc-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
                 >
                   <Trash2 className="w-4 h-4" />
@@ -305,7 +398,7 @@ export const AIMentorChat = () => {
               </div>
             </div>
 
-            {/* 3 Modes Cards */}
+            {/* 3 Modes Cards - Individual Conversation Boxes */}
             <div className="space-y-2">
               <span className="text-xs font-semibold uppercase tracking-wider text-zinc-400 px-1">
                 Select Coaching Domain
@@ -315,6 +408,7 @@ export const AIMentorChat = () => {
                 {Object.entries(MODE_CONFIG).map(([key, config]) => {
                   const isSelected = mode === key;
                   const Icon = config.icon;
+                  const count = (conversations[key] || []).length;
 
                   let activeClass;
                   if (isSelected) {
@@ -356,9 +450,24 @@ export const AIMentorChat = () => {
                       onClick={() => setMode(key)}
                       className={`p-3 rounded-2xl border text-left transition-all duration-200 ${activeClass}`}
                     >
-                      <div className="flex items-center space-x-2">
-                        <Icon className={`w-4 h-4 shrink-0 ${iconColor}`} />
-                        <span className="font-bold text-xs sm:text-sm">{config.title}</span>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-2">
+                          <Icon className={`w-4 h-4 shrink-0 ${iconColor}`} />
+                          <span className="font-bold text-xs sm:text-sm">{config.title}</span>
+                        </div>
+                        {count > 1 && (
+                          <span
+                            className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${
+                              isSelected
+                                ? 'bg-white/20 text-white'
+                                : isNight
+                                ? 'bg-zinc-800 text-zinc-400'
+                                : 'bg-slate-100 text-slate-600'
+                            }`}
+                          >
+                            {count}
+                          </span>
+                        )}
                       </div>
                       <p className={`hidden md:block text-[11px] mt-1 leading-snug ${subtitleColor}`}>
                         {config.description}
@@ -372,7 +481,7 @@ export const AIMentorChat = () => {
             {/* Quick Prompts List (Visible on tablet/laptop) */}
             <div className="hidden md:block space-y-2">
               <span className="text-xs font-semibold uppercase tracking-wider text-zinc-400 px-1 flex items-center gap-1.5">
-                <Lightbulb className="w-3.5 h-3.5 text-amber-400" />
+                <Sparkles className="w-3.5 h-3.5 text-violet-400" />
                 Prompt Ideas for {currentConfig.title}
               </span>
               <div className="space-y-1.5">
@@ -414,9 +523,24 @@ export const AIMentorChat = () => {
             isNight ? 'bg-[#141418] border-[#27272A]' : 'bg-white border-slate-200 shadow-sm'
           }`}
         >
-          {/* Messages Scroll Area */}
+          {/* Header of Active Conversation */}
+          <div
+            className={`px-4 py-2.5 border-b flex items-center justify-between transition-colors ${
+              isNight ? 'bg-[#16161D] border-zinc-800/80' : 'bg-slate-50/80 border-slate-200'
+            }`}
+          >
+            <div className="flex items-center space-x-2">
+              <currentConfig.icon className="w-4 h-4 text-violet-500" />
+              <span className="text-xs font-bold tracking-tight">{currentConfig.title} Thread</span>
+            </div>
+            <span className="text-[11px] text-zinc-400 font-mono">
+              {activeMessages.length} {activeMessages.length === 1 ? 'message' : 'messages'}
+            </span>
+          </div>
+
+          {/* Messages Scroll Area for this specific mode */}
           <div className="flex-1 p-4 overflow-y-auto space-y-3.5">
-            {messages.map((m) => {
+            {activeMessages.map((m) => {
               const isUser = m.sender === 'user';
               return (
                 <div
