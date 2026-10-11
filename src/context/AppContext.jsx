@@ -15,6 +15,7 @@ import {
   getTodayDateString,
   evaluateTaskStatus,
   timeToMinutes,
+  formatTime12h,
   SUGGESTED_ROUTINE,
 } from '../utils/timeUtils';
 import { calculateDynamicPoints } from '../services/pointsService';
@@ -246,12 +247,12 @@ export const AppProvider = ({ children }) => {
       const updated = prev.map((t) => {
         if (t.id === taskId) {
           // Verify time window
-          const startMin = timeToMinutes(t.startTime);
           const endMin = timeToMinutes(t.endTime);
           const graceLimit = endMin + 60;
 
-          if (nowMin < startMin) {
-            showToast('Cannot mark as done before scheduled start time!', 'warning');
+          if (nowMin < endMin) {
+            const leftMin = endMin - nowMin;
+            showToast(`Exact time hasn't finished yet! Complete the remaining ${leftMin}m until ${formatTime12h(t.endTime)}.`, 'warning');
             return t;
           }
 
