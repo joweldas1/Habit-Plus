@@ -18,6 +18,7 @@ import {
   Loader2,
   ShieldCheck,
   Lightbulb,
+  ArrowRight,
 } from 'lucide-react';
 
 const MODE_CONFIG = {
@@ -27,9 +28,18 @@ const MODE_CONFIG = {
     placeholder: 'Paste or type your English text here for grammar, polish & grading...',
     description: 'Fluency drills, grammar correction, sentence polish & constructive scoring.',
     suggestions: [
-      'Grade my draft: "I am trying to habituate myself for morning work."',
-      'Teach me 2 productivity idioms for professional speaking.',
-      'How do I politely decline distractions at work in English?',
+      {
+        label: 'Grade my draft',
+        prompt: 'Please review and grade this English writing for grammar, vocabulary and fluency: "I am trying to habituate myself for morning deep work without distractions."',
+      },
+      {
+        label: 'Productivity idioms',
+        prompt: 'Teach me 3 powerful English idioms related to focus and productivity with example sentences.',
+      },
+      {
+        label: 'Polite workplace replies',
+        prompt: 'How do I politely decline workplace interruptions and stay focused on my tasks in professional English?',
+      },
     ],
   },
   coaching: {
@@ -38,9 +48,18 @@ const MODE_CONFIG = {
     placeholder: 'Ask about habit stacking, routine planning, or daily consistency...',
     description: 'Science-backed daily system design, atomic habit loops & friction reduction.',
     suggestions: [
-      'How to prevent bedtime procrastination after 10 PM?',
-      'What is habit stacking and how do I attach workouts to my day?',
-      'How do I maintain discipline during busy work days?',
+      {
+        label: 'Fix bedtime routine',
+        prompt: 'How do I stop revenge bedtime procrastination after 10 PM and wake up energetic at 6 AM?',
+      },
+      {
+        label: 'Habit stacking system',
+        prompt: 'What is habit stacking and how can I attach a daily workout to my existing morning routine?',
+      },
+      {
+        label: 'Break a stubborn habit',
+        prompt: 'What is the scientifically proven way to increase friction and break a stubborn bad habit?',
+      },
     ],
   },
   motivation: {
@@ -49,9 +68,18 @@ const MODE_CONFIG = {
     placeholder: 'Feeling demotivated or procrastinating? Ask for an instant focus boost...',
     description: 'Stoic reality checks, energy restoration & anti-procrastination fuel.',
     suggestions: [
-      'I feel demotivated and want to skip my evening task.',
-      'Give me a stoic reality check on discipline vs fleeting motivation.',
-      'Remind me why consistency today compounds into massive results.',
+      {
+        label: 'Beat procrastination now',
+        prompt: 'I feel lazy and want to skip my scheduled task right now. Give me a direct stoic reality check to start immediately.',
+      },
+      {
+        label: '2-Minute momentum rule',
+        prompt: 'Explain the 2-minute momentum rule and how it tricks the brain into taking action without friction.',
+      },
+      {
+        label: 'Compound consistency',
+        prompt: 'Remind me why doing my small routine today compounds into life-changing results in 6 months.',
+      },
     ],
   },
 };
@@ -348,17 +376,25 @@ export const AIMentorChat = () => {
                 Prompt Ideas for {currentConfig.title}
               </span>
               <div className="space-y-1.5">
-                {currentConfig.suggestions.map((prompt, i) => (
+                {currentConfig.suggestions.map((item, i) => (
                   <button
                     key={i}
-                    onClick={() => handleSend(prompt)}
-                    className={`w-full p-2.5 rounded-xl border text-left text-xs transition-colors ${
+                    onClick={() => handleSend(item.prompt)}
+                    className={`w-full p-2.5 rounded-xl border text-left transition-all group ${
                       isNight
-                        ? 'bg-zinc-900/60 border-zinc-800 text-zinc-300 hover:border-zinc-600 hover:text-white'
-                        : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
+                        ? 'bg-zinc-900/60 border-zinc-800 text-zinc-300 hover:border-violet-500/50 hover:bg-zinc-900'
+                        : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-white hover:border-violet-300 shadow-2xs'
                     }`}
                   >
-                    "{prompt}"
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-semibold group-hover:text-violet-500 transition-colors">
+                        {item.label}
+                      </span>
+                      <ArrowRight className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity text-violet-500" />
+                    </div>
+                    <p className="text-[11px] text-zinc-400 truncate mt-0.5">
+                      {item.prompt}
+                    </p>
                   </button>
                 ))}
               </div>
@@ -427,30 +463,39 @@ export const AIMentorChat = () => {
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Quick Suggestion Chips (Visible on ALL devices right above input) */}
+          {/* Quick Suggestion Chips Strip (Hidden scrollbar, luxury styling) */}
           <div
             className={`px-3 py-2 border-t flex items-center gap-2 overflow-x-auto no-scrollbar transition-colors ${
-              isNight ? 'bg-[#16161D] border-zinc-800' : 'bg-slate-50 border-slate-200'
+              isNight ? 'bg-[#141418] border-zinc-800/80' : 'bg-slate-50/90 border-slate-200/90'
             }`}
           >
-            <span className="text-[10px] uppercase font-bold tracking-wider text-zinc-500 shrink-0 flex items-center gap-1">
-              <Lightbulb className="w-3 h-3 text-amber-400" />
-              {currentConfig.title}:
+            <span className="text-[10px] uppercase font-bold tracking-wider text-zinc-400 shrink-0 flex items-center gap-1 pl-1">
+              <Sparkles className="w-3 h-3 text-violet-400" />
+              <span className="hidden sm:inline">Suggestions:</span>
             </span>
-            {currentConfig.suggestions.map((prompt, i) => (
-              <button
-                key={i}
-                type="button"
-                onClick={() => handleSend(prompt)}
-                className={`text-[11px] font-medium whitespace-nowrap px-3 py-1 rounded-full border shrink-0 transition-all active:scale-95 ${
-                  isNight
-                    ? 'bg-zinc-800/80 hover:bg-zinc-700/80 text-zinc-300 border-zinc-700/70 hover:text-white'
-                    : 'bg-white hover:bg-slate-100 text-slate-700 border-slate-200 shadow-2xs hover:border-slate-300'
-                }`}
-              >
-                {prompt}
-              </button>
-            ))}
+
+            <div className="flex items-center gap-1.5 flex-nowrap shrink-0">
+              {currentConfig.suggestions.map((item, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => handleSend(item.prompt)}
+                  title={item.prompt}
+                  className={`text-xs font-semibold whitespace-nowrap px-3 py-1.5 rounded-full border transition-all active:scale-95 flex items-center gap-1.5 cursor-pointer shadow-2xs ${
+                    isNight
+                      ? 'bg-zinc-900/90 hover:bg-zinc-800 text-zinc-200 hover:text-white border-zinc-700/70 hover:border-zinc-600'
+                      : 'bg-white hover:bg-violet-50/80 text-slate-700 hover:text-violet-700 border-slate-200/90 hover:border-violet-200 shadow-xs'
+                  }`}
+                >
+                  <span
+                    className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                      isNight ? 'bg-violet-400' : 'bg-violet-600'
+                    }`}
+                  />
+                  <span>{item.label}</span>
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Message Input Box with Mode-Adaptive Dynamic Placeholder */}
