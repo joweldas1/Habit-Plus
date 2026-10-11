@@ -12,13 +12,13 @@ export const AnalyticsChart = ({ logs = [] }) => {
 
   return (
     <div
-      className={`w-full rounded-2xl border p-4 space-y-3 transition-all ${
+      className={`w-full rounded-2xl border p-3 sm:p-4 space-y-2.5 sm:space-y-3 transition-all ${
         isNight ? 'bg-[#141418] border-[#27272A]' : 'bg-white border-slate-200 shadow-sm'
       }`}
     >
       <div className="flex items-center justify-between text-xs">
         <span className={`font-semibold ${isNight ? 'text-zinc-200' : 'text-slate-800'}`}>Weekly Consistency Trend</span>
-        <span className={`text-[11px] ${isNight ? 'text-zinc-400' : 'text-slate-500'}`}>Target Line: 70 pts</span>
+        <span className={`text-[10px] sm:text-[11px] ${isNight ? 'text-zinc-400' : 'text-slate-500'}`}>Target Line: 70 pts</span>
       </div>
 
       <div className="h-36 w-full flex items-end justify-between gap-2 pt-4 px-1 pb-1 relative">

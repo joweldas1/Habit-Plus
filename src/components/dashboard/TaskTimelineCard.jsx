@@ -69,11 +69,11 @@ export const TaskTimelineCard = ({ task }) => {
 
   return (
     <div
-      className={`relative w-full rounded-2xl border p-4 transition-all duration-300 ${containerStyle}`}
+      className={`relative w-full rounded-xl sm:rounded-2xl border p-3 sm:p-4 transition-all duration-300 ${containerStyle}`}
     >
       {/* Active "NOW" Live Badge */}
       {isActive && (
-        <div className="absolute -top-2.5 right-4 flex items-center space-x-1 px-2.5 py-0.5 rounded-full bg-gradient-to-r from-[#8B5CF6] to-[#38BDF8] text-[10px] font-bold text-white shadow-md uppercase tracking-wider">
+        <div className="absolute -top-2.5 right-3 sm:right-4 flex items-center space-x-1 px-2 py-0.5 rounded-full bg-gradient-to-r from-[#8B5CF6] to-[#38BDF8] text-[9.5px] sm:text-[10px] font-bold text-white shadow-md uppercase tracking-wider">
           <span className="w-1.5 h-1.5 rounded-full bg-white animate-live-dot" />
           <span>NOW</span>
         </div>
@@ -81,7 +81,7 @@ export const TaskTimelineCard = ({ task }) => {
 
       {/* Awaiting Done Grace Badge */}
       {isAwaitingDone && (
-        <div className="absolute -top-2.5 right-4 flex items-center space-x-1 px-2.5 py-0.5 rounded-full bg-amber-500 text-[10px] font-bold text-black shadow-md uppercase tracking-wider">
+        <div className="absolute -top-2.5 right-3 sm:right-4 flex items-center space-x-1 px-2 py-0.5 rounded-full bg-amber-500 text-[9.5px] sm:text-[10px] font-bold text-black shadow-md uppercase tracking-wider">
           <AlertTriangle className="w-3 h-3" />
           <span>{t.gracePeriod}</span>
         </div>
@@ -90,40 +90,40 @@ export const TaskTimelineCard = ({ task }) => {
       <div className="flex items-start justify-between">
         <div className="space-y-1 pr-2 flex-1">
           {/* Header metadata: Time & Category */}
-          <div className="flex items-center space-x-2 text-xs">
+          <div className="flex items-center space-x-1.5 sm:space-x-2 text-[11px] sm:text-xs">
             <span className={`font-semibold font-mono flex items-center gap-1 ${isNight ? 'text-zinc-400' : 'text-slate-500'}`}>
               <Clock className="w-3.5 h-3.5 opacity-70" />
               {formatTimeRange12h(task.startTime, task.endTime)}
             </span>
 
-            <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold border ${categoryColor}`}>
+            <span className={`px-1.5 sm:px-2 py-0.5 rounded-full text-[9.5px] sm:text-[10px] font-semibold border ${categoryColor}`}>
               {task.category}
             </span>
 
             {task.type === 'avoid' && (
-              <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/20 text-rose-400 border border-rose-500/30">
+              <span className="px-1.5 py-0.5 rounded-full text-[9.5px] sm:text-[10px] font-bold bg-rose-500/20 text-rose-400 border border-rose-500/30">
                 Avoid
               </span>
             )}
           </div>
 
           {/* Title & Points */}
-          <div className="flex items-baseline space-x-2 pt-0.5">
+          <div className="flex items-baseline space-x-1.5 sm:space-x-2 pt-0.5">
             <h4
-              className={`text-sm sm:text-base font-semibold tracking-tight ${
+              className={`text-xs sm:text-sm md:text-base font-semibold tracking-tight ${
                 isDone ? 'line-through opacity-70' : isMissed ? 'line-through text-rose-400/80' : ''
               }`}
             >
               {task.title}
             </h4>
-            <span className="text-xs font-bold text-[#8B5CF6] whitespace-nowrap">
+            <span className="text-[11px] sm:text-xs font-bold text-[#8B5CF6] whitespace-nowrap">
               +{task.points} pts
             </span>
           </div>
 
           {/* Countdown & Live status caption */}
           {(isActive || isAwaitingDone || isUpcoming) && (
-            <p className={`text-[11px] font-medium ${isNight ? 'text-zinc-400' : 'text-slate-500'}`}>
+            <p className={`text-[10px] sm:text-[11px] font-medium ${isNight ? 'text-zinc-400' : 'text-slate-500'}`}>
               {getRemainingTimeDisplay(task, currentTime)}
             </p>
           )}
@@ -132,13 +132,13 @@ export const TaskTimelineCard = ({ task }) => {
         {/* Action Button / Status Badge */}
         <div className="shrink-0 flex items-center">
           {isDone ? (
-            <div className="flex items-center space-x-1 px-3 py-1.5 rounded-xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 text-xs font-bold">
-              <CheckCircle2 className="w-4 h-4" />
+            <div className="flex items-center space-x-1 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg sm:rounded-xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 text-[11px] sm:text-xs font-bold">
+              <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               <span>{t.alreadyDone}</span>
             </div>
           ) : isMissed ? (
-            <div className="flex items-center space-x-1 px-3 py-1.5 rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-400 text-xs font-bold">
-              <XCircle className="w-4 h-4" />
+            <div className="flex items-center space-x-1 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg sm:rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-400 text-[11px] sm:text-xs font-bold">
+              <XCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               <span>{t.lockedMissed}</span>
             </div>
           ) : canMarkDone ? (

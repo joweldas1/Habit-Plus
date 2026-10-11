@@ -66,18 +66,18 @@ export const LiveClock = () => {
 
   return (
     <div
-      className={`w-full rounded-2xl border p-4 transition-all duration-300 ${
+      className={`w-full rounded-2xl border p-3 sm:p-4 transition-all duration-300 ${
         isNight
           ? 'bg-gradient-to-r from-[#141418] via-[#16161D] to-[#141418] border-[#27272A]'
           : 'bg-white border-slate-200 shadow-sm'
       }`}
     >
-      <div className="flex items-center justify-between gap-3">
+      <div className="flex items-center justify-between gap-2.5 sm:gap-3">
         {/* Left Side: Dynamic Icon Box + Live Tracker & Time */}
-        <div className="flex items-center space-x-2.5 sm:space-x-3 min-w-0">
+        <div className="flex items-center space-x-2 sm:space-x-3 min-w-0">
           <div className="relative shrink-0">
             <div
-              className={`p-2.5 rounded-xl border transition-all duration-300 ${
+              className={`p-2 sm:p-2.5 rounded-lg sm:rounded-xl border transition-all duration-300 ${
                 activeTask
                   ? activeTask.status === 'awaiting_done'
                     ? 'bg-amber-500/15 border-amber-500/30 text-amber-400'
@@ -92,10 +92,10 @@ export const LiveClock = () => {
               {activeTask ? (
                 <CategorySymbol
                   category={activeTask.category}
-                  className="w-5 h-5"
+                  className="w-4 h-4 sm:w-5 sm:h-5"
                 />
               ) : (
-                <Clock className="w-5 h-5" />
+                <Clock className="w-4 h-4 sm:w-5 sm:h-5" />
               )}
             </div>
           </div>
@@ -103,7 +103,7 @@ export const LiveClock = () => {
           <div className="min-w-0">
             {/* Top row: LIVE TRACKER */}
             <span
-              className={`text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider block leading-none ${
+              className={`text-[9.5px] sm:text-[11px] font-semibold uppercase tracking-wider block leading-none ${
                 isNight ? 'text-zinc-400' : 'text-slate-500'
               }`}
             >
@@ -113,25 +113,25 @@ export const LiveClock = () => {
             {/* Bottom row: Digital Clock */}
             <div className="flex items-baseline space-x-1 mt-0.5">
               <span
-                className={`text-2xl font-bold tracking-tight tabular-nums leading-none ${
+                className={`text-xl sm:text-2xl font-bold tracking-tight tabular-nums leading-none ${
                   isNight ? 'text-white' : 'text-slate-900'
                 }`}
               >
                 {time}
               </span>
-              <span className="text-xs font-bold text-violet-500 uppercase leading-none">{ampm}</span>
+              <span className="text-[11px] sm:text-xs font-bold text-violet-500 uppercase leading-none">{ampm}</span>
             </div>
           </div>
         </div>
 
         {/* Right Side: Calendar & Date */}
         <div
-          className={`shrink-0 text-right flex items-center space-x-2 ${
+          className={`shrink-0 text-right flex items-center space-x-1.5 sm:space-x-2 ${
             isNight ? 'text-zinc-400' : 'text-slate-600'
           }`}
         >
-          <Calendar className="w-4 h-4 text-[#38BDF8]" />
-          <span className="text-xs font-medium">{formatDate()}</span>
+          <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#38BDF8]" />
+          <span className="text-[11px] sm:text-xs font-medium">{formatDate()}</span>
         </div>
       </div>
     </div>

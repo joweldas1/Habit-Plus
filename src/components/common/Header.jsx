@@ -39,11 +39,11 @@ export const Header = () => {
   ];
 
   return (
-    <header className={`py-2 px-3 md:px-5 rounded-2xl border transition-all duration-300 backdrop-blur-md flex items-center justify-between ${
+    <header className={`py-1.5 px-2.5 sm:py-2 sm:px-3 md:px-5 rounded-2xl border transition-all duration-300 backdrop-blur-md flex items-center justify-between ${
       isNight ? 'bg-[#141418]/95 border-[#27272A]' : 'bg-white/95 border-slate-200/80 shadow-sm'
     }`}>
       {/* Brand & Greeting */}
-      <div className="flex items-center space-x-3">
+      <div className="flex items-center space-x-2 sm:space-x-3">
         <button
           onClick={() => setActiveTab('dashboard')}
           className="focus:outline-none flex items-center transition-transform hover:scale-102 active:scale-98"
@@ -52,7 +52,7 @@ export const Header = () => {
           <img
             src={isNight ? logoNight : logoDay}
             alt="HabitPlus Logo"
-            className="h-8 sm:h-9 md:h-10 w-auto max-w-[150px] sm:max-w-[170px] md:max-w-[190px] object-contain"
+            className="h-7 sm:h-8 md:h-10 w-auto max-w-[130px] sm:max-w-[170px] md:max-w-[190px] object-contain"
           />
         </button>
 
@@ -95,11 +95,11 @@ export const Header = () => {
       </nav>
 
       {/* Actions (Streak, Theme, Settings) */}
-      <div className="flex items-center space-x-2 sm:space-x-2.5">
+      <div className="flex items-center space-x-1.5 sm:space-x-2.5">
         {/* Streak Flame Badge */}
         {streakData.currentStreak > 0 && (
-          <div className="flex items-center space-x-1 px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-amber-500/15 border border-amber-500/30 text-amber-400">
-            <Flame className="w-4 h-4 text-amber-500 fill-amber-500 animate-pulse" />
+          <div className="flex items-center space-x-1 px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-lg sm:rounded-xl text-[11px] sm:text-xs font-semibold bg-amber-500/15 border border-amber-500/30 text-amber-400">
+            <Flame className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-500 fill-amber-500 animate-pulse" />
             <span className="font-mono">{streakData.currentStreak}d</span>
           </div>
         )}
@@ -108,26 +108,26 @@ export const Header = () => {
         <button
           onClick={toggleTheme}
           aria-label="Toggle Theme"
-          className={`p-2 sm:p-2.5 rounded-xl border transition-all duration-200 ${
+          className={`p-1.5 sm:p-2 md:p-2.5 rounded-lg sm:rounded-xl border transition-all duration-200 ${
             isNight
               ? 'bg-[#181820] border-[#27272A] text-zinc-300 hover:text-white hover:border-zinc-700'
               : 'bg-slate-100 border-slate-200 text-slate-700 hover:text-black hover:border-slate-300 shadow-sm'
           }`}
         >
-          {isNight ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-indigo-600" />}
+          {isNight ? <Sun className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400" /> : <Moon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-indigo-600" />}
         </button>
 
         {/* Settings Button */}
         <button
           onClick={() => setIsSettingsOpen(true)}
           aria-label="Open Settings"
-          className={`p-2 sm:p-2.5 rounded-xl border transition-all duration-200 ${
+          className={`p-1.5 sm:p-2 md:p-2.5 rounded-lg sm:rounded-xl border transition-all duration-200 ${
             isNight
               ? 'bg-[#181820] border-[#27272A] text-zinc-300 hover:text-white hover:border-zinc-700'
               : 'bg-slate-100 border-slate-200 text-slate-700 hover:text-black hover:border-slate-300 shadow-sm'
           }`}
         >
-          <Settings className="w-4 h-4 text-[#8B5CF6]" />
+          <Settings className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#8B5CF6]" />
         </button>
       </div>
     </header>

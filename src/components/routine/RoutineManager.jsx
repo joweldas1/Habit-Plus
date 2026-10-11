@@ -86,10 +86,10 @@ export const RoutineManager = () => {
           </div>
 
           {/* Action Button Strip */}
-          <div className="grid grid-cols-2 gap-2.5 pt-1">
+          <div className="grid grid-cols-2 gap-2 sm:gap-2.5 pt-1">
             <button
               onClick={handleOpenAdd}
-              className={`h-11 sm:h-12 flex items-center justify-center space-x-1.5 px-3 rounded-xl text-xs sm:text-[13px] font-semibold whitespace-nowrap transition-all duration-200 active:scale-95 shadow-sm ${
+              className={`h-10 sm:h-12 flex items-center justify-center space-x-1.5 px-2.5 sm:px-3 rounded-xl text-xs sm:text-[13px] font-semibold whitespace-nowrap transition-all duration-200 active:scale-95 shadow-sm ${
                 isNight
                   ? 'bg-violet-600 hover:bg-violet-500 text-white border border-violet-500/40 shadow-purple-950/40'
                   : 'bg-slate-900 hover:bg-slate-800 text-white border border-slate-900 shadow-slate-300/40'
@@ -102,7 +102,7 @@ export const RoutineManager = () => {
             <button
               onClick={() => triggerPointRedistribution()}
               disabled={isAiLoading || routine.length === 0}
-              className={`h-11 sm:h-12 flex items-center justify-center space-x-1.5 px-3 rounded-xl text-xs sm:text-[13px] font-semibold whitespace-nowrap transition-all duration-200 active:scale-95 disabled:opacity-50 border shadow-sm ${
+              className={`h-10 sm:h-12 flex items-center justify-center space-x-1.5 px-2.5 sm:px-3 rounded-xl text-xs sm:text-[13px] font-semibold whitespace-nowrap transition-all duration-200 active:scale-95 disabled:opacity-50 border shadow-sm ${
                 isNight
                   ? 'bg-violet-950/40 hover:bg-violet-900/50 text-violet-300 border-violet-500/30 hover:border-violet-400/50'
                   : 'bg-violet-50 hover:bg-violet-100 text-violet-800 border-violet-200 hover:border-violet-300'
@@ -121,7 +121,7 @@ export const RoutineManager = () => {
             <button
               onClick={loadSuggestedRoutine}
               disabled={isAiLoading}
-              className={`flex-1 h-9 px-3 rounded-xl text-[11px] font-medium border transition-colors flex items-center justify-center gap-1.5 whitespace-nowrap ${
+              className={`flex-1 h-8 sm:h-9 px-2.5 sm:px-3 rounded-lg sm:rounded-xl text-[10.5px] sm:text-[11px] font-medium border transition-colors flex items-center justify-center gap-1.5 whitespace-nowrap ${
                 isAiLoading ? 'opacity-50 cursor-not-allowed' : ''
               } ${
                 isNight
@@ -135,7 +135,7 @@ export const RoutineManager = () => {
 
             <button
               onClick={clearRoutine}
-              className={`h-9 px-3 rounded-xl text-[11px] font-medium border transition-colors flex items-center justify-center gap-1.5 whitespace-nowrap ${
+              className={`h-8 sm:h-9 px-2.5 sm:px-3 rounded-lg sm:rounded-xl text-[10.5px] sm:text-[11px] font-medium border transition-colors flex items-center justify-center gap-1.5 whitespace-nowrap ${
                 isNight
                   ? 'bg-rose-950/20 border-rose-900/30 text-rose-400 hover:bg-rose-950/40'
                   : 'bg-rose-50 border-rose-200 text-rose-600 hover:bg-rose-100'
@@ -175,33 +175,33 @@ export const RoutineManager = () => {
               </button>
             </div>
           ) : (
-            <div className="space-y-2.5">
+            <div className="space-y-2 sm:space-y-2.5">
               {sortedRoutine.map((task) => (
                 <div
                   key={task.id}
-                  className={`p-3.5 rounded-2xl border flex items-center justify-between transition-all hover:scale-[1.005] ${
+                  className={`p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl border flex items-center justify-between transition-all hover:scale-[1.005] ${
                     isNight ? 'bg-[#141418] border-[#27272A] hover:border-zinc-700' : 'bg-white border-slate-200 shadow-sm hover:border-slate-300'
                   }`}
                 >
                   <div className="space-y-1 pr-2">
-                    <div className="flex items-center space-x-2 text-xs">
+                    <div className="flex items-center space-x-1.5 sm:space-x-2 text-[11px] sm:text-xs">
                       <span className="font-semibold text-zinc-400 font-mono flex items-center gap-1">
                         <Clock className="w-3.5 h-3.5 opacity-70" />
                         {formatTimeRange12h(task.startTime, task.endTime)}
                       </span>
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-purple-500/10 text-purple-400 border border-purple-500/20">
+                      <span className="px-1.5 sm:px-2 py-0.5 rounded-full text-[9.5px] sm:text-[10px] font-semibold bg-purple-500/10 text-purple-400 border border-purple-500/20">
                         {task.category}
                       </span>
                       {task.type === 'avoid' && (
-                        <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/20 text-rose-400 border border-rose-500/30">
+                        <span className="px-1.5 py-0.5 rounded-full text-[9.5px] sm:text-[10px] font-bold bg-rose-500/20 text-rose-400 border border-rose-500/30">
                           Avoid
                         </span>
                       )}
                     </div>
 
-                    <div className="flex items-baseline space-x-2">
-                      <h4 className="text-sm font-semibold tracking-tight">{task.title}</h4>
-                      <span className="text-xs font-bold text-[#8B5CF6]">
+                    <div className="flex items-baseline space-x-1.5 sm:space-x-2">
+                      <h4 className="text-xs sm:text-sm font-semibold tracking-tight">{task.title}</h4>
+                      <span className="text-[11px] sm:text-xs font-bold text-[#8B5CF6]">
                         +{task.points || 0} pts
                       </span>
                     </div>
@@ -211,25 +211,25 @@ export const RoutineManager = () => {
                   <div className="flex items-center space-x-1 shrink-0">
                     <button
                       onClick={() => handleOpenEdit(task)}
-                      className={`p-2 rounded-xl transition-colors ${
+                      className={`p-1.5 sm:p-2 rounded-lg sm:rounded-xl transition-colors ${
                         isNight
                           ? 'text-zinc-400 hover:text-white hover:bg-zinc-800'
                           : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'
                       }`}
                       title="Edit Habit"
                     >
-                      <Edit2 className="w-4 h-4" />
+                      <Edit2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     </button>
                     <button
                       onClick={() => handleDelete(task.id)}
-                      className={`p-2 rounded-xl transition-colors ${
+                      className={`p-1.5 sm:p-2 rounded-lg sm:rounded-xl transition-colors ${
                         isNight
                           ? 'text-rose-400 hover:text-rose-300 hover:bg-rose-950/30'
                           : 'text-rose-600 hover:text-rose-700 hover:bg-rose-50'
                       }`}
                       title="Delete Habit"
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     </button>
                   </div>
                 </div>

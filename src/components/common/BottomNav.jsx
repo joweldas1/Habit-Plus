@@ -15,7 +15,7 @@ export const BottomNav = () => {
 
   return (
     <nav
-      className={`fixed bottom-0 left-0 right-0 z-40 max-w-md mx-auto border-t backdrop-blur-xl px-2 py-1.5 transition-all duration-300 md:hidden ${
+      className={`fixed bottom-0 left-0 right-0 z-40 max-w-md mx-auto border-t backdrop-blur-xl px-1.5 py-1 transition-all duration-300 md:hidden ${
         isNight
           ? 'bg-[#09090B]/95 border-[#27272A] text-zinc-300'
           : 'bg-white/95 border-slate-200 text-slate-800 shadow-lg'
@@ -30,7 +30,7 @@ export const BottomNav = () => {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex flex-col items-center justify-center py-2 px-1 rounded-2xl transition-all duration-200 active:scale-95 ${
+              className={`flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all duration-200 active:scale-95 ${
                 isActive
                   ? isNight
                     ? 'text-violet-400 bg-violet-500/15'
@@ -41,12 +41,12 @@ export const BottomNav = () => {
               }`}
             >
               <div className="relative">
-                <Icon className={`w-5 h-5 transition-transform ${isActive ? 'scale-110' : ''}`} />
+                <Icon className={`w-[18px] h-[18px] transition-transform ${isActive ? 'scale-110' : ''}`} />
                 {isActive && (
-                  <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-current" />
+                  <span className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-current" />
                 )}
               </div>
-              <span className={`text-[10px] mt-1 font-semibold truncate ${isActive ? 'opacity-100' : 'opacity-70'}`}>
+              <span className={`text-[9.5px] mt-0.5 font-semibold truncate ${isActive ? 'opacity-100' : 'opacity-70'}`}>
                 {tab.label}
               </span>
             </button>

@@ -17,7 +17,7 @@ export const MetricsSummary = () => {
 
   return (
     <div
-      className={`w-full rounded-2xl border p-4 space-y-3 transition-all duration-300 ${
+      className={`w-full rounded-2xl border p-3 sm:p-4 space-y-2.5 sm:space-y-3 transition-all duration-300 ${
         isNight ? 'bg-[#141418] border-[#27272A]' : 'bg-white border-slate-200 shadow-sm'
       }`}
     >
@@ -67,20 +67,20 @@ export const MetricsSummary = () => {
       </div>
 
       {/* Progress Pill Breakdown */}
-      <div className="pt-2 border-t border-zinc-800/40 grid grid-cols-3 gap-2 text-center">
-        <div className="flex items-center justify-center space-x-1.5 py-1.5 px-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
-          <CheckCircle className="w-3.5 h-3.5" />
-          <span className="text-xs font-semibold">{completedTasks.length} {t.completed}</span>
+      <div className="pt-2 border-t border-zinc-800/40 grid grid-cols-3 gap-1.5 sm:gap-2 text-center">
+        <div className="flex items-center justify-center space-x-1 sm:space-x-1.5 py-1 px-1 sm:py-1.5 sm:px-2 rounded-lg sm:rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
+          <CheckCircle className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />
+          <span className="text-[10px] sm:text-xs font-semibold truncate">{completedTasks.length} {t.completed}</span>
         </div>
 
-        <div className="flex items-center justify-center space-x-1.5 py-1.5 px-2 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400">
-          <XCircle className="w-3.5 h-3.5" />
-          <span className="text-xs font-semibold">{missedTasks.length} {t.missed}</span>
+        <div className="flex items-center justify-center space-x-1 sm:space-x-1.5 py-1 px-1 sm:py-1.5 sm:px-2 rounded-lg sm:rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400">
+          <XCircle className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />
+          <span className="text-[10px] sm:text-xs font-semibold truncate">{missedTasks.length} {t.missed}</span>
         </div>
 
-        <div className="flex items-center justify-center space-x-1.5 py-1.5 px-2 rounded-xl bg-sky-500/10 border border-sky-500/20 text-sky-400">
-          <Clock className="w-3.5 h-3.5" />
-          <span className="text-xs font-semibold">{remainingTasks.length} {t.remaining}</span>
+        <div className="flex items-center justify-center space-x-1 sm:space-x-1.5 py-1 px-1 sm:py-1.5 sm:px-2 rounded-lg sm:rounded-xl bg-sky-500/10 border border-sky-500/20 text-sky-400">
+          <Clock className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />
+          <span className="text-[10px] sm:text-xs font-semibold truncate">{remainingTasks.length} {t.remaining}</span>
         </div>
       </div>
     </div>

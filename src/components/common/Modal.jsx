@@ -21,31 +21,31 @@ export const Modal = ({ isOpen, onClose, title, children, maxWidth = 'max-w-md' 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-sm animate-in fade-in duration-200">
       <div
-        className={`w-full ${maxWidth} rounded-2xl border shadow-2xl overflow-hidden transition-all duration-300 max-h-[90vh] flex flex-col ${
+        className={`w-full ${maxWidth} rounded-xl sm:rounded-2xl border shadow-2xl overflow-hidden transition-all duration-300 max-h-[90vh] flex flex-col ${
           isNight
             ? 'bg-[#141418] border-[#27272A] text-[#F4F4F5]'
             : 'bg-white border-slate-200 text-[#1E293B]'
         }`}
       >
         {/* Header */}
-        <div className={`px-5 py-4 border-b flex items-center justify-between ${
+        <div className={`px-4 py-3 sm:px-5 sm:py-4 border-b flex items-center justify-between ${
           isNight ? 'border-[#27272A] bg-[#141418]' : 'border-slate-100 bg-slate-50'
         }`}>
-          <h3 className="text-base font-semibold tracking-tight">{title}</h3>
+          <h3 className="text-sm sm:text-base font-semibold tracking-tight">{title}</h3>
           <button
             onClick={onClose}
             className={`p-1.5 rounded-lg transition-colors ${
               isNight ? 'hover:bg-zinc-800 text-zinc-400 hover:text-white' : 'hover:bg-slate-200 text-slate-500 hover:text-slate-900'
             }`}
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
         </div>
 
         {/* Body */}
-        <div className="p-5 overflow-y-auto space-y-4">
+        <div className="p-3.5 sm:p-5 overflow-y-auto space-y-3.5 sm:space-y-4">
           {children}
         </div>
       </div>

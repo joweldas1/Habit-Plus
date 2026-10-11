@@ -28,25 +28,25 @@ export const InstallBanner = ({ compact = false }) => {
   return (
     <>
       <div
-        className={`w-full rounded-2xl border transition-all duration-300 flex items-center justify-between ${
-          compact ? 'py-2 px-3' : 'p-3.5'
+        className={`w-full rounded-xl sm:rounded-2xl border transition-all duration-300 flex items-center justify-between ${
+          compact ? 'py-1.5 px-2.5 sm:py-2 sm:px-3' : 'p-2.5 sm:p-3.5'
         } ${
           isNight
             ? 'bg-violet-950/20 border-violet-500/25'
             : 'bg-white border-slate-200 shadow-2xs'
         }`}
       >
-        <div className="flex items-center space-x-3 min-w-0 pr-2">
-          <div className={`p-2 rounded-xl shrink-0 ${
+        <div className="flex items-center space-x-2.5 sm:space-x-3 min-w-0 pr-2">
+          <div className={`p-1.5 sm:p-2 rounded-lg sm:rounded-xl shrink-0 ${
             isNight ? 'bg-violet-500/15 text-violet-400' : 'bg-slate-100 text-slate-700'
           }`}>
-            <Download className="w-4 h-4" />
+            <Download className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           </div>
           <div className="min-w-0">
             <h4 className="text-xs sm:text-sm font-semibold tracking-tight truncate">
               {t.installPromptTitle}
             </h4>
-            <p className={`text-[11px] truncate ${
+            <p className={`text-[10px] sm:text-[11px] truncate ${
               isNight ? 'text-zinc-400' : 'text-slate-500'
             }`}>
               {t.installPromptDesc}
@@ -56,7 +56,7 @@ export const InstallBanner = ({ compact = false }) => {
 
         <button
           onClick={handleInstallClick}
-          className={`shrink-0 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap shadow-sm active:scale-95 transition-all ${
+          className={`shrink-0 px-2.5 py-1.5 sm:px-3.5 sm:py-2 rounded-lg sm:rounded-xl text-[11px] sm:text-xs font-semibold whitespace-nowrap shadow-sm active:scale-95 transition-all ${
             isNight
               ? 'bg-violet-600 hover:bg-violet-500 text-white'
               : 'bg-slate-900 hover:bg-slate-800 text-white'
