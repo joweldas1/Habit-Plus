@@ -120,13 +120,16 @@ export const RoutineManager = () => {
           <div className="flex items-center space-x-2 pt-0.5">
             <button
               onClick={loadSuggestedRoutine}
+              disabled={isAiLoading}
               className={`flex-1 h-9 px-3 rounded-xl text-[11px] font-medium border transition-colors flex items-center justify-center gap-1.5 whitespace-nowrap ${
+                isAiLoading ? 'opacity-50 cursor-not-allowed' : ''
+              } ${
                 isNight
                   ? 'bg-zinc-900/80 border-zinc-800 text-zinc-300 hover:bg-zinc-800'
                   : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50 shadow-2xs'
               }`}
             >
-              <RotateCcw className="w-3.5 h-3.5 shrink-0" />
+              {isAiLoading ? <Loader2 className="w-3.5 h-3.5 shrink-0 animate-spin" /> : <RotateCcw className="w-3.5 h-3.5 shrink-0" />}
               <span className="truncate">{t.useSuggested}</span>
             </button>
 
@@ -162,9 +165,13 @@ export const RoutineManager = () => {
               <p className="text-xs sm:text-sm text-zinc-400">{t.emptyRoutine}</p>
               <button
                 onClick={loadSuggestedRoutine}
-                className="px-4 py-2.5 rounded-xl text-xs font-semibold bg-[#8B5CF6] text-white"
+                disabled={isAiLoading}
+                className={`px-4 py-2.5 rounded-xl text-xs font-semibold bg-[#8B5CF6] text-white flex items-center justify-center gap-1.5 mx-auto ${
+                  isAiLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-violet-500'
+                }`}
               >
-                {t.useSuggested}
+                {isAiLoading && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                <span>{t.useSuggested}</span>
               </button>
             </div>
           ) : (

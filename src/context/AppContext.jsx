@@ -341,7 +341,7 @@ export const AppProvider = ({ children }) => {
   /**
    * Action: Redistribute 100 points with AI or Smart Fallback (Section 11)
    */
-  const triggerPointRedistribution = useCallback(async (routineListToDistribute = null) => {
+  const triggerPointRedistribution = useCallback(async (routineListToDistribute = null, silent = false) => {
     setIsAiLoading(true);
     try {
       const targetRoutine = routineListToDistribute || routine;
@@ -362,10 +362,12 @@ export const AppProvider = ({ children }) => {
         return updated;
       });
 
-      if (res.fallbackUsed) {
-        showToast('Points allocated (100 pts) using balanced smart formula.', 'info');
-      } else {
-        showToast('AI successfully balanced 100 marks across habits!', 'success');
+      if (!silent) {
+        if (res.fallbackUsed) {
+          showToast('Points allocated (100 pts) using balanced smart formula.', 'info');
+        } else {
+          showToast('AI successfully balanced 100 marks across habits!', 'success');
+        }
       }
     } catch {
       showToast('Error distributing points.', 'error');
@@ -378,10 +380,11 @@ export const AppProvider = ({ children }) => {
    * Action: Load Suggested Routine (Section 8)
    */
   const loadSuggestedRoutine = useCallback(async () => {
+    if (isAiLoading) return;
     await saveRoutineAndUpdateUpcoming(SUGGESTED_ROUTINE);
-    await triggerPointRedistribution(SUGGESTED_ROUTINE);
+    await triggerPointRedistribution(SUGGESTED_ROUTINE, true);
     showToast('Suggested routine loaded with 100 AI marks!', 'success');
-  }, [saveRoutineAndUpdateUpcoming, triggerPointRedistribution, showToast]);
+  }, [isAiLoading, saveRoutineAndUpdateUpcoming, triggerPointRedistribution, showToast]);
 
   /**
    * Action: Clear Routine
