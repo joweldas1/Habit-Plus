@@ -41,7 +41,7 @@ export const translations = {
     // Routine
     routinePlanner: "Routine Planner",
     routineSub: "Set your daily master blueprint. Changes update your upcoming day.",
-    addTask: "+ Add Habit",
+    addTask: "Add Habit",
     editTask: "Edit Habit",
     coverageTitle: "24-Hour Coverage",
     coveredHours: "Covered",
@@ -179,7 +179,7 @@ export const translations = {
     // Routine
     routinePlanner: "রুটিন প্ল্যানার",
     routineSub: "এখানে আপনার সারাদিনের মাস্টার প্ল্যান সেট করুন। পরিবর্তন আজকের বাকি দিন ও ভবিষ্যতে প্রযোজ্য হবে।",
-    addTask: "+ অভ্যাস যোগ",
+    addTask: "অভ্যাস যোগ",
     editTask: "অভ্যাস এডিট",
     coverageTitle: "২৪-ঘণ্টার কভারেজ",
     coveredHours: "কভার্ড",
