@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import { ToastProvider } from './context/ToastContext';
 import { AppProvider, useApp } from './context/AppContext';
 import { ToastContainer } from './components/common/ToastContainer';
@@ -15,6 +15,15 @@ import { AIConnectionTestModal } from './components/settings/AIConnectionTestMod
 function MainAppShell() {
   const { activeTab, settings, isSettingsOpen, setIsSettingsOpen, isAIConnectionTestOpen, setIsAIConnectionTestOpen } = useApp();
   const isNight = settings.theme === 'night';
+  const mainRef = useRef(null);
+
+  // Automatically reset scroll position to top whenever switching tabs to prevent glitching/stuck UI
+  useEffect(() => {
+    if (mainRef.current) {
+      mainRef.current.scrollTop = 0;
+    }
+    window.scrollTo(0, 0);
+  }, [activeTab]);
 
   return (
     <div
@@ -37,7 +46,14 @@ function MainAppShell() {
         </div>
 
         {/* Tab Content - Scrollable interior filling remaining 100vh space */}
-        <main className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden pr-0.5 sm:pr-1 pb-20 md:pb-2">
+        <main
+          ref={mainRef}
+          className={`flex-1 min-h-0 overflow-x-hidden pr-0.5 sm:pr-1 ${
+            activeTab === 'mentor'
+              ? 'overflow-y-hidden flex flex-col h-full pb-18 md:pb-2'
+              : 'overflow-y-auto pb-20 md:pb-2'
+          }`}
+        >
           {activeTab === 'dashboard' && <DashboardView />}
           {activeTab === 'routine' && <RoutineManager />}
           {activeTab === 'mentor' && <AIMentorChat />}

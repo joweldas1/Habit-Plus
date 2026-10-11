@@ -131,7 +131,7 @@ export const HistoryView = () => {
               <p className="text-xs text-zinc-400">{t.noHistoryYet}</p>
             </div>
           ) : (
-            <div className="space-y-2.5 max-h-[550px] overflow-y-auto pr-1">
+            <div className="space-y-2.5">
               {historyLogs.map((log) => (
                 <button
                   key={log.date}

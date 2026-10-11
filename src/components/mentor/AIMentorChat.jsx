@@ -265,7 +265,7 @@ export const AIMentorChat = () => {
 
   const [inputText, setInputText] = useState('');
   const [loading, setLoading] = useState(false);
-  const messagesEndRef = useRef(null);
+  const messagesContainerRef = useRef(null);
 
   // Capitalized first letter of user name for profile avatar
   const userInitial = (settings.name?.trim()?.charAt(0) || 'U').toUpperCase();
@@ -277,9 +277,12 @@ export const AIMentorChat = () => {
   );
   const currentConfig = MODE_CONFIG[mode] || MODE_CONFIG.english;
 
+  // Auto-scroll inside chat box only (never scrolls ancestor main or window!)
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [activeMessages]);
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+    }
+  }, [activeMessages, loading]);
 
   const handleSend = async (textToSend = null) => {
     const text = (textToSend || inputText).trim();
@@ -373,11 +376,11 @@ export const AIMentorChat = () => {
   };
 
   return (
-    <div className="animate-in fade-in duration-300">
+    <div className="h-full min-h-0 flex flex-col flex-1 animate-in fade-in duration-300">
       {/* Desktop/Laptop 2-Column Layout */}
-      <div className="flex flex-col md:flex-row gap-4 md:gap-6 items-stretch">
+      <div className="flex flex-col md:flex-row gap-2.5 sm:gap-3 md:gap-4 flex-1 min-h-0 h-full items-stretch">
         {/* Left Sidebar on Tablets & PC: Mode Selector & Prompt Recommendations */}
-        <div className="md:w-80 lg:w-96 space-y-4 shrink-0 flex flex-col justify-between md:overflow-y-auto md:max-h-[calc(100vh-125px)] pr-1">
+        <div className="md:w-80 lg:w-96 space-y-2.5 sm:space-y-3 md:space-y-4 shrink-0 flex flex-col justify-between md:overflow-y-auto pr-0 md:pr-1">
           <div className="space-y-4">
             {/* Header info */}
             <div
@@ -527,13 +530,13 @@ export const AIMentorChat = () => {
 
         {/* Right Main Chat Terminal (Fits seamlessly within 100vh layout) */}
         <div
-          className={`flex-1 flex flex-col h-[calc(100vh-210px)] md:h-[calc(100vh-125px)] min-h-[440px] rounded-2xl border overflow-hidden transition-all duration-300 ${
+          className={`flex-1 min-h-0 flex flex-col rounded-2xl border overflow-hidden transition-all duration-300 ${
             isNight ? 'bg-[#141418] border-[#27272A]' : 'bg-white border-slate-200 shadow-sm'
           }`}
         >
           {/* Header of Active Conversation */}
           <div
-            className={`px-4 py-2.5 border-b flex items-center justify-between transition-colors ${
+            className={`px-4 py-2.5 border-b flex items-center justify-between transition-colors shrink-0 ${
               isNight ? 'bg-[#16161D] border-zinc-800/80' : 'bg-slate-50/80 border-slate-200'
             }`}
           >
@@ -547,7 +550,7 @@ export const AIMentorChat = () => {
           </div>
 
           {/* Messages Scroll Area for this specific mode */}
-          <div className="flex-1 p-4 overflow-y-auto space-y-3.5">
+          <div ref={messagesContainerRef} className="flex-1 min-h-0 p-3.5 sm:p-4 overflow-y-auto space-y-3.5">
             {activeMessages.map((m) => {
               const isUser = m.sender === 'user';
               return (
@@ -598,8 +601,6 @@ export const AIMentorChat = () => {
                 <span>{t.thinking}</span>
               </div>
             )}
-
-            <div ref={messagesEndRef} />
           </div>
 
           {/* Quick Suggestion Chips Strip (Hidden scrollbar, luxury styling) */}
