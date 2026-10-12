@@ -199,63 +199,54 @@ export async function executeGeminiWithFallback(systemInstruction, userPrompt, j
 }
 
 /**
- * Diagnostic function for Settings -> Test AI Connection button
+ * Generates 3 dynamic, unexplored topic suggestions based on the ongoing conversation
+ * to spark curiosity on things related to the topic that the user may not know yet.
  */
-export async function testAIConnections() {
-  const keys = getApiKeys();
-  const results = {
-    primary: { configured: !!keys.primary, status: 'untested', model: null, latency: 0, error: null },
-    secondary: { configured: !!keys.secondary, status: 'untested', model: null, latency: 0, error: null },
-  };
+export async function generateContextualSuggestions(mode, history = [], language = 'en') {
+  if (!history || history.length < 2) return null;
 
-  const testKey = async (type, key) => {
-    if (!key) {
-      results[type] = {
-        configured: false,
-        status: 'not_configured',
-        model: null,
-        latency: 0,
-        error: 'No API key provided',
-      };
-      return;
+  const modeTopic =
+    mode === 'english'
+      ? 'English communication, vocabulary nuance, grammar and professional fluency'
+      : mode === 'coaching'
+      ? 'habit systems, behavioral friction, daily routine architecture and sleep science'
+      : 'stoic discipline, overcoming mental friction, neurochemistry and focus';
+
+  const systemInstruction = `You are a creative thought-provoking mentor in ${modeTopic}.
+Task: Analyze the recent conversation between User and Mentor. Detect the specific topic being discussed.
+Generate exactly 3 fresh, intriguing, lesser-known angles or insightful follow-up questions that the user probably has not thought to ask about yet.
+Language: If conversation or app language is "${language}" and contains Bengali, write in natural Bengali; otherwise concise English.
+Output: Return strictly a valid JSON array of 3 items, with NO markdown code fences and NO extra text:
+[
+  { "label": "Short Title (2-3 words)", "prompt": "Complete engaging question that explores an unexpected angle" }
+]`;
+
+  const recent = history
+    .slice(-4)
+    .map((m) => `${m.sender === 'user' ? 'User' : 'Mentor'}: ${m.text.slice(0, 250)}`)
+    .join('\n');
+  const userPrompt = `Conversation:\n${recent}\n\nGenerate 3 unexplored follow-up suggestions in JSON:`;
+
+  try {
+    const res = await executeGeminiWithFallback(systemInstruction, userPrompt, true);
+    let parsed = null;
+    try {
+      const cleaned = res.text.replace(/```json/g, '').replace(/```/g, '').trim();
+      parsed = JSON.parse(cleaned);
+    } catch {
+      const match = res.text.match(/\[[\s\S]*\]/);
+      if (match) parsed = JSON.parse(match[0]);
     }
-
-    for (const model of CANDIDATE_MODELS) {
-      const startTime = performance.now();
-      try {
-        await callGemini(
-          key,
-          model,
-          'You are HabitPlus diagnostic.',
-          'Respond with strictly the word "OK".'
-        );
-        const duration = Math.round(performance.now() - startTime);
-        results[type] = {
-          configured: true,
-          status: 'success',
-          model,
-          latency: duration,
-          error: null,
-        };
-        return;
-      } catch (err) {
-        results[type] = {
-          configured: true,
-          status: 'failed',
-          model,
-          latency: Math.round(performance.now() - startTime),
-          error: err.message,
-        };
-      }
+    if (Array.isArray(parsed) && parsed.length > 0) {
+      return parsed.slice(0, 3).map((item) => ({
+        label: String(item.label || item.title || 'Explore').slice(0, 32),
+        prompt: String(item.prompt || item.question || item.label),
+      }));
     }
-  };
-
-  await Promise.all([
-    testKey('primary', keys.primary),
-    testKey('secondary', keys.secondary),
-  ]);
-
-  return results;
+  } catch (err) {
+    console.warn('Could not generate contextual suggestions via AI:', err.message);
+  }
+  return null;
 }
 
 /**

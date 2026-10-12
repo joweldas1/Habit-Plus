@@ -41,7 +41,6 @@ export const AppProvider = ({ children }) => {
 
   // Modals & Panels
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [isAIConnectionTestOpen, setIsAIConnectionTestOpen] = useState(false);
   const [installPromptEvent, setInstallPromptEvent] = useState(null);
   const [isStandalone, setIsStandalone] = useState(false);
 
@@ -439,8 +438,6 @@ export const AppProvider = ({ children }) => {
         isAiLoading,
         isSettingsOpen,
         setIsSettingsOpen,
-        isAIConnectionTestOpen,
-        setIsAIConnectionTestOpen,
         installPromptEvent,
         isStandalone,
         markTaskDone,

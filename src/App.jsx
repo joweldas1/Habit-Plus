@@ -11,11 +11,10 @@ import { AIMentorChat } from './components/mentor/AIMentorChat';
 import { HistoryView } from './components/history/HistoryView';
 import { WelcomeModal } from './components/onboarding/WelcomeModal';
 import { SettingsModal } from './components/settings/SettingsModal';
-import { AIConnectionTestModal } from './components/settings/AIConnectionTestModal';
 import { EntranceScreen } from './components/common/EntranceScreen';
 
 function MainAppShell() {
-  const { activeTab, settings, isSettingsOpen, setIsSettingsOpen, isAIConnectionTestOpen, setIsAIConnectionTestOpen } = useApp();
+  const { activeTab, settings, isSettingsOpen, setIsSettingsOpen } = useApp();
   const isNight = settings.theme === 'night';
   const mainRef = useRef(null);
 
@@ -99,10 +98,6 @@ function MainAppShell() {
       <SettingsModal
         isOpen={isSettingsOpen}
         onClose={() => setIsSettingsOpen(false)}
-      />
-      <AIConnectionTestModal
-        isOpen={isAIConnectionTestOpen}
-        onClose={() => setIsAIConnectionTestOpen(false)}
       />
       <ToastContainer />
     </div>

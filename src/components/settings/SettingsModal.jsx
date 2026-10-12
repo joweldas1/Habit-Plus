@@ -7,13 +7,15 @@ import {
   validateAndImportData,
   resetAllData,
 } from '../../services/storageService';
-import { requestNotificationPermission } from '../../services/notificationService';
+import {
+  requestNotificationPermission,
+  sendTestNotification,
+} from '../../services/notificationService';
 import {
   Moon,
   Sun,
   Languages,
   Bell,
-  Sparkles,
   Download,
   Upload,
   RotateCcw,
@@ -24,7 +26,6 @@ export const SettingsModal = ({ isOpen, onClose }) => {
   const {
     settings,
     updateSettings,
-    setIsAIConnectionTestOpen,
     t,
   } = useApp();
   const { showToast } = useToast();
@@ -57,12 +58,25 @@ export const SettingsModal = ({ isOpen, onClose }) => {
       if (permission === 'granted') {
         updateSettings({ notificationsEnabled: true });
         showToast('Local notifications activated!', 'success');
+        // Instantly fire a test notification to confirm mobile device compatibility
+        sendTestNotification();
       } else {
         showToast('Notification permission was not granted by browser.', 'warning');
       }
     } else {
       updateSettings({ notificationsEnabled: false });
       showToast('Notifications silenced.', 'info');
+    }
+  };
+
+  const handleTestNotification = async () => {
+    const res = await sendTestNotification();
+    if (res.success) {
+      showToast('Alert sent! Check your notification bar / lock screen.', 'success');
+    } else if (res.reason === 'permission_denied') {
+      showToast('Please enable notifications in your browser/device settings.', 'warning');
+    } else {
+      showToast('Notifications not supported in this browser.', 'warning');
     }
   };
 
@@ -204,44 +218,50 @@ export const SettingsModal = ({ isOpen, onClose }) => {
             </button>
           </div>
 
-          {/* Notifications Toggle */}
-          <div className={`flex items-center justify-between pt-1 border-t ${
+          {/* Notifications Toggle & Instant Test */}
+          <div className={`space-y-2 pt-1 border-t ${
             isNight ? 'border-zinc-800/60' : 'border-slate-200'
           }`}>
-            <div className="flex items-center space-x-2.5">
-              <Bell className="w-4 h-4 text-amber-400" />
-              <span className="font-semibold">{t.notifications}</span>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2.5">
+                <Bell className="w-4 h-4 text-amber-400" />
+                <span className="font-semibold">{t.notifications}</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                {settings.notificationsEnabled && (
+                  <button
+                    type="button"
+                    onClick={handleTestNotification}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-semibold border transition-all active:scale-95 ${
+                      isNight
+                        ? 'bg-amber-500/15 border-amber-500/30 text-amber-300 hover:bg-amber-500/25'
+                        : 'bg-amber-50 border-amber-300 text-amber-800 hover:bg-amber-100'
+                    }`}
+                  >
+                    🔔 Test Alert
+                  </button>
+                )}
+                <button
+                  onClick={handleToggleNotifications}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors ${
+                    settings.notificationsEnabled
+                      ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                      : isNight
+                        ? 'bg-zinc-800 text-zinc-400 border border-zinc-700'
+                        : 'bg-white text-slate-600 border border-slate-300'
+                  }`}
+                >
+                  {settings.notificationsEnabled ? 'Active ✓' : 'Disabled'}
+                </button>
+              </div>
             </div>
-            <button
-              onClick={handleToggleNotifications}
-              className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors ${
-                settings.notificationsEnabled
-                  ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                  : isNight
-                    ? 'bg-zinc-800 text-zinc-400 border border-zinc-700'
-                    : 'bg-white text-slate-600 border border-slate-300'
-              }`}
-            >
-              {settings.notificationsEnabled ? 'Active ✓' : 'Disabled'}
-            </button>
+            {settings.notificationsEnabled && (
+              <p className="text-[11px] text-zinc-400">
+                Supports background reminders on mobile (Android/iOS PWA) & desktop. Tap "Test Alert" to verify sound and vibration.
+              </p>
+            )}
           </div>
         </div>
-
-        {/* AI Diagnostic Button */}
-        <button
-          onClick={() => {
-            onClose();
-            setIsAIConnectionTestOpen(true);
-          }}
-          className={`w-full py-3 px-4 rounded-2xl border font-semibold flex items-center justify-center space-x-2 transition-all active:scale-95 shadow-sm ${
-            isNight
-              ? 'border-violet-500/30 bg-violet-950/20 hover:bg-violet-950/40 text-violet-300'
-              : 'border-violet-200 bg-violet-50 hover:bg-violet-100 text-violet-800'
-          }`}
-        >
-          <Sparkles className="w-4 h-4 text-violet-500" />
-          <span>{t.testAIConnection}</span>
-        </button>
 
         {/* Backup & Restore Strip */}
         <div className="grid grid-cols-2 gap-2 pt-1">

@@ -1,7 +1,10 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useApp } from '../../context/AppContext';
 import { useToast } from '../../context/ToastContext';
-import { sendMentorMessage } from '../../services/geminiService';
+import {
+  sendMentorMessage,
+  generateContextualSuggestions,
+} from '../../services/geminiService';
 import {
   getMentorMessages,
   saveMentorMessages,
@@ -17,10 +20,65 @@ import {
   Loader2,
   ShieldCheck,
   ArrowRight,
+  RotateCw,
+  X,
 } from 'lucide-react';
 
 const generateMessageId = () => `msg_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
 const getFormattedTimestamp = () => new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+export const SUGGESTION_POOLS = {
+  english: [
+    { label: 'Grade my draft', prompt: 'Please review and grade this English writing for grammar, vocabulary and fluency: "I am trying to habituate myself for morning deep work without distractions."' },
+    { label: 'Productivity idioms', prompt: 'Teach me 3 powerful English idioms related to focus and productivity with realistic example sentences.' },
+    { label: 'Polite workplace replies', prompt: 'How do I politely decline workplace interruptions and stay focused on my tasks in professional English?' },
+    { label: 'Subjunctive mood', prompt: 'Explain how and when to use the English subjunctive mood in professional emails with realistic examples.' },
+    { label: 'Affect vs Effect', prompt: 'Explain the nuanced differences and edge cases between "affect", "effect", and their rare noun/verb forms.' },
+    { label: 'Eliminate filler words', prompt: 'Give me practical techniques to stop using filler words ("um", "like", "basically") during English conversations.' },
+    { label: 'Executive C-level idioms', prompt: 'Teach me 3 high-impact idioms frequently used by leaders and executives in top strategy meetings.' },
+    { label: 'Diplomatic pushback', prompt: 'How do I push back against unrealistic deadlines professionally and diplomatically in English?' },
+    { label: 'Natural speaking flow', prompt: 'How can I connect my thoughts smoothly in spoken English without pausing awkwardly?' },
+    { label: 'Avoid passive voice', prompt: 'How do I identify and transform weak passive sentences into punchy, persuasive active voice?' },
+    { label: 'Synonym nuances', prompt: 'What is the subtle difference in meaning and tone between "pragmatic", "feasible", and "viable"?' },
+    { label: 'Elevate daily email', prompt: 'Here is a routine work update email. Show me how to rewrite it with senior-level professional polish.' },
+  ],
+  coaching: [
+    { label: 'Fix bedtime routine', prompt: 'How do I stop revenge bedtime procrastination after 10 PM and wake up energetic at 6 AM?' },
+    { label: 'Habit stacking system', prompt: 'What is habit stacking and how can I attach a daily workout or reading to my existing anchor routine?' },
+    { label: 'Break a stubborn habit', prompt: 'What is the scientifically proven way to increase friction and break a stubborn bad habit?' },
+    { label: '2-Minute momentum rule', prompt: 'Explain the 2-minute entry barrier rule and how it tricks the brain into starting hard tasks.' },
+    { label: 'Dopamine detox protocol', prompt: 'Give me a realistic 24-hour dopamine reset protocol that genuinely reduces phone scrolling addiction.' },
+    { label: 'Circadian sunlight sync', prompt: 'How does getting sunlight within 30 minutes of waking reset cortisol and evening melatonin release?' },
+    { label: 'Never miss twice rule', prompt: 'How do I apply James Clear\'s "Never Miss Twice" rule to avoid the guilt spiral after slipping?' },
+    { label: 'Environment redesign', prompt: 'Give me an actionable checklist to redesign my room so positive habits are effortless and temptations invisible.' },
+    { label: 'Overcome day 3 drop-off', prompt: 'Why does human motivation drop sharply on day 3 or 4 of a new routine, and how do I push through?' },
+    { label: 'Time-boxing deep work', prompt: 'How do I set up a time-boxing schedule that protects my 2 hours of peak cognitive focus before noon?' },
+    { label: 'Non-Sleep Deep Rest (NSDR)', prompt: 'What is NSDR (Non-Sleep Deep Rest) and how can a 10-minute session restore mental energy mid-day?' },
+    { label: 'Friction audit formula', prompt: 'Help me conduct a 5-minute friction audit on my morning routine to eliminate wasted decision fatigue.' },
+  ],
+  motivation: [
+    { label: 'Kill resistance now', prompt: 'I feel lazy and want to skip my scheduled task right now. Give me a direct stoic reality check to start immediately.' },
+    { label: '2-Minute momentum rule', prompt: 'Explain how starting for just 120 seconds breaks psychological inertia and triggers task completion.' },
+    { label: 'Compound consistency', prompt: 'Remind me why doing my small routine today compounds into life-changing results in 6 months.' },
+    { label: 'Mel Robbins 5-sec rule', prompt: 'Explain the neuroscience behind the 5-second countdown rule and how it stops hesitation.' },
+    { label: 'Marcus Aurelius advice', prompt: 'What did Roman Emperor Marcus Aurelius tell himself when he felt unmotivated to get out of bed?' },
+    { label: 'Dichotomy of control', prompt: 'How can I apply Epictetus\'s dichotomy of control to stop stressing over things outside my power?' },
+    { label: 'Task paralysis triage', prompt: 'I am overwhelmed and freezing up. Give me a 3-step triage to execute right this second.' },
+    { label: 'Discipline vs Motivation', prompt: 'Why is waiting for motivation an illusion, and how do high performers build identity-driven discipline?' },
+    { label: '1% Better every day math', prompt: 'Break down the math and psychological proof behind getting 1% better every day for a year.' },
+    { label: 'Amor Fati mindset', prompt: 'How do I cultivate the Stoic concept of "Amor Fati" (love of one\'s fate) when work feels exhausting?' },
+    { label: 'Jocko Willink discipline', prompt: 'Explain Jocko Willink\'s philosophy "Discipline equals Freedom" in the context of daily habits.' },
+    { label: 'Overcoming mental fatigue', prompt: 'Is mental exhaustion real or perceived? How do I distinguish between needing rest vs needing discipline?' },
+  ],
+};
+
+export const getRandomSuggestions = (modeKey, exclude = [], count = 3) => {
+  const pool = SUGGESTION_POOLS[modeKey] || SUGGESTION_POOLS.english;
+  const filtered = pool.filter((item) => !exclude.some((ex) => ex.prompt === item.prompt));
+  const candidatePool = filtered.length >= count ? filtered : pool;
+  const shuffled = [...candidatePool].sort(() => 0.5 - Math.random());
+  return shuffled.slice(0, count);
+};
 
 const MODE_CONFIG = {
   english: {
@@ -29,20 +87,6 @@ const MODE_CONFIG = {
     badgeColor: 'violet',
     placeholder: 'Paste or type your English text here for grammar, polish & grading...',
     description: 'Fluency drills, grammar correction, sentence polish & constructive scoring.',
-    suggestions: [
-      {
-        label: 'Grade my draft',
-        prompt: 'Please review and grade this English writing for grammar, vocabulary and fluency: "I am trying to habituate myself for morning deep work without distractions."',
-      },
-      {
-        label: 'Productivity idioms',
-        prompt: 'Teach me 3 powerful English idioms related to focus and productivity with example sentences.',
-      },
-      {
-        label: 'Polite workplace replies',
-        prompt: 'How do I politely decline workplace interruptions and stay focused on my tasks in professional English?',
-      },
-    ],
   },
   coaching: {
     title: 'Habit Coaching',
@@ -50,20 +94,6 @@ const MODE_CONFIG = {
     badgeColor: 'sky',
     placeholder: 'Ask about habit stacking, routine planning, or daily consistency...',
     description: 'Science-backed daily system design, atomic habit loops & friction reduction.',
-    suggestions: [
-      {
-        label: 'Fix bedtime routine',
-        prompt: 'How do I stop revenge bedtime procrastination after 10 PM and wake up energetic at 6 AM?',
-      },
-      {
-        label: 'Habit stacking system',
-        prompt: 'What is habit stacking and how can I attach a daily workout to my existing morning routine?',
-      },
-      {
-        label: 'Break a stubborn habit',
-        prompt: 'What is the scientifically proven way to increase friction and break a stubborn bad habit?',
-      },
-    ],
   },
   motivation: {
     title: 'Discipline Boost',
@@ -71,20 +101,6 @@ const MODE_CONFIG = {
     badgeColor: 'amber',
     placeholder: 'Feeling demotivated or procrastinating? Ask for an instant focus boost...',
     description: 'Stoic reality checks, energy restoration & anti-procrastination fuel.',
-    suggestions: [
-      {
-        label: 'Beat procrastination now',
-        prompt: 'I feel lazy and want to skip my scheduled task right now. Give me a direct stoic reality check to start immediately.',
-      },
-      {
-        label: '2-Minute momentum rule',
-        prompt: 'Explain the 2-minute momentum rule and how it tricks the brain into taking action without friction.',
-      },
-      {
-        label: 'Compound consistency',
-        prompt: 'Remind me why doing my small routine today compounds into life-changing results in 6 months.',
-      },
-    ],
   },
 };
 
@@ -270,12 +286,82 @@ export const AIMentorChat = () => {
   // Capitalized first letter of user name for profile avatar
   const userInitial = (settings.name?.trim()?.charAt(0) || 'U').toUpperCase();
 
+  // Toggleable and dynamic suggestion engine
+  const [showSuggestions, setShowSuggestions] = useState(() => {
+    try {
+      return localStorage.getItem('habitplus_show_suggestions') !== 'false';
+    } catch {
+      return true;
+    }
+  });
+
+  const [modeSuggestions, setModeSuggestions] = useState(() => ({
+    english: getRandomSuggestions('english'),
+    coaching: getRandomSuggestions('coaching'),
+    motivation: getRandomSuggestions('motivation'),
+  }));
+
+  const [isRotating, setIsRotating] = useState(false);
+
+  const toggleSuggestions = useCallback(() => {
+    setShowSuggestions((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem('habitplus_show_suggestions', String(next));
+      } catch {
+        // ignore
+      }
+      return next;
+    });
+  }, []);
+
+  const handleShuffleSuggestions = useCallback(() => {
+    setIsRotating(true);
+    setModeSuggestions((prev) => ({
+      ...prev,
+      [mode]: getRandomSuggestions(mode, prev[mode] || []),
+    }));
+    setTimeout(() => setIsRotating(false), 500);
+  }, [mode]);
+
+  // Rotate suggestions every time mode changes or component is entered
+  useEffect(() => {
+    setModeSuggestions((prev) => ({
+      ...prev,
+      [mode]: getRandomSuggestions(mode, prev[mode] || []),
+    }));
+  }, [mode]);
+
+  // Context-aware AI suggestions: track topic and generate unexplored angles
+  useEffect(() => {
+    const currentMsgs = conversations[mode] || [];
+    const hasUserMsg = currentMsgs.some((m) => m.sender === 'user');
+    if (!hasUserMsg) return;
+
+    let isMounted = true;
+    generateContextualSuggestions(mode, currentMsgs, settings.language || 'en')
+      .then((aiSuggestions) => {
+        if (isMounted && aiSuggestions && aiSuggestions.length > 0) {
+          setModeSuggestions((prev) => ({
+            ...prev,
+            [mode]: aiSuggestions,
+          }));
+        }
+      })
+      .catch(() => {});
+
+    return () => {
+      isMounted = false;
+    };
+  }, [conversations, mode, settings.language]);
+
   // Active mode messages
   const activeMessages = useMemo(
     () => conversations[mode] || INITIAL_MESSAGES[mode] || [],
     [conversations, mode]
   );
   const currentConfig = MODE_CONFIG[mode] || MODE_CONFIG.english;
+  const currentSuggestions = modeSuggestions[mode] || getRandomSuggestions(mode);
 
   // Auto-scroll inside chat box only (never scrolls ancestor main or window!)
   useEffect(() => {
@@ -489,14 +575,24 @@ export const AIMentorChat = () => {
 
             {/* Quick Prompts List (Visible on tablet/laptop) */}
             <div className="hidden md:block space-y-2">
-              <span className="text-xs font-semibold uppercase tracking-wider text-zinc-400 px-1 flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-violet-400" />
-                Prompt Ideas for {currentConfig.title}
-              </span>
+              <div className="flex items-center justify-between px-1">
+                <span className="text-xs font-semibold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-violet-400" />
+                  Prompt Ideas ({currentConfig.title})
+                </span>
+                <button
+                  type="button"
+                  onClick={handleShuffleSuggestions}
+                  title="Shuffle suggestions"
+                  className="p-1 rounded text-zinc-400 hover:text-violet-400 transition-colors"
+                >
+                  <RotateCw className={`w-3.5 h-3.5 ${isRotating ? 'animate-spin' : ''}`} />
+                </button>
+              </div>
               <div className="space-y-1.5">
-                {currentConfig.suggestions.map((item, i) => (
+                {currentSuggestions.map((item, i) => (
                   <button
-                    key={i}
+                    key={`${item.label}-${i}`}
                     onClick={() => handleSend(item.prompt)}
                     className={`w-full p-2.5 rounded-xl border text-left transition-all group ${
                       isNight
@@ -548,6 +644,24 @@ export const AIMentorChat = () => {
               <span className="text-[11px] sm:text-xs font-bold tracking-tight">{currentConfig.title} Thread</span>
             </div>
             <div className="flex items-center space-x-1.5 sm:space-x-2">
+              <button
+                type="button"
+                onClick={toggleSuggestions}
+                title={showSuggestions ? 'Hide suggestion bar' : 'Show suggestion bar'}
+                className={`px-2 py-1 rounded-lg text-xs font-semibold flex items-center space-x-1 transition-colors ${
+                  showSuggestions
+                    ? 'text-violet-400 bg-violet-500/15 border border-violet-500/30'
+                    : isNight
+                    ? 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/80 border border-zinc-800'
+                    : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100 border border-slate-200'
+                }`}
+              >
+                <Sparkles className="w-3 h-3" />
+                <span className="hidden sm:inline text-[10px]">
+                  {showSuggestions ? 'Suggestions' : 'Show Prompts'}
+                </span>
+              </button>
+
               <span className="text-[10px] sm:text-[11px] text-zinc-400 font-mono">
                 {activeMessages.length} {activeMessages.length === 1 ? 'msg' : 'messages'}
               </span>
@@ -623,40 +737,64 @@ export const AIMentorChat = () => {
             )}
           </div>
 
-          {/* Quick Suggestion Chips Strip (Hidden scrollbar, luxury styling) */}
-          <div
-            className={`px-2 py-1 sm:px-3 sm:py-1.5 border-t flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar transition-colors shrink-0 ${
-              isNight ? 'bg-[#141418] border-zinc-800/80' : 'bg-slate-50/90 border-slate-200/90'
-            }`}
-          >
-            <span className="text-[9px] sm:text-[10px] uppercase font-bold tracking-wider text-zinc-400 shrink-0 flex items-center gap-1 pl-0.5">
-              <Sparkles className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-violet-400" />
-              <span className="hidden sm:inline">Suggestions:</span>
-            </span>
+          {/* Quick Suggestion Chips Strip (Collapsible, Dynamic & Curiosity-Driven) */}
+          {showSuggestions && (
+            <div
+              className={`px-2 py-1 sm:px-3 sm:py-1.5 border-t flex items-center justify-between gap-1.5 transition-all duration-200 shrink-0 ${
+                isNight ? 'bg-[#141418] border-zinc-800/80' : 'bg-slate-50/90 border-slate-200/90'
+              }`}
+            >
+              <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar flex-1 min-w-0 py-0.5">
+                <span className="text-[9px] sm:text-[10px] uppercase font-bold tracking-wider text-zinc-400 shrink-0 flex items-center gap-1 pl-0.5">
+                  <Sparkles className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-violet-400" />
+                  <span className="hidden sm:inline">Explore:</span>
+                </span>
 
-            <div className="flex items-center gap-1 sm:gap-1.5 flex-nowrap shrink-0">
-              {currentConfig.suggestions.map((item, i) => (
+                <div className="flex items-center gap-1 sm:gap-1.5 flex-nowrap shrink-0">
+                  {currentSuggestions.map((item, i) => (
+                    <button
+                      key={`${item.label}-${i}`}
+                      type="button"
+                      onClick={() => handleSend(item.prompt)}
+                      title={item.prompt}
+                      className={`text-[10px] sm:text-xs font-semibold whitespace-nowrap px-2 py-0.5 sm:px-3 sm:py-1 rounded-full border transition-all active:scale-95 flex items-center gap-1 cursor-pointer shadow-2xs ${
+                        isNight
+                          ? 'bg-zinc-900/90 hover:bg-zinc-800 text-zinc-200 hover:text-white border-zinc-700/70 hover:border-zinc-600'
+                          : 'bg-white hover:bg-violet-50/80 text-slate-700 hover:text-violet-700 border-slate-200/90 hover:border-violet-200 shadow-xs'
+                      }`}
+                    >
+                      <span
+                        className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                          isNight ? 'bg-violet-400' : 'bg-violet-600'
+                        }`}
+                      />
+                      <span>{item.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Action Buttons: Shuffle and Hide */}
+              <div className="flex items-center space-x-1 shrink-0 pl-1 border-l border-zinc-700/40">
                 <button
-                  key={i}
                   type="button"
-                  onClick={() => handleSend(item.prompt)}
-                  title={item.prompt}
-                  className={`text-[10px] sm:text-xs font-semibold whitespace-nowrap px-2 py-0.5 sm:px-3 sm:py-1 rounded-full border transition-all active:scale-95 flex items-center gap-1 cursor-pointer shadow-2xs ${
-                    isNight
-                      ? 'bg-zinc-900/90 hover:bg-zinc-800 text-zinc-200 hover:text-white border-zinc-700/70 hover:border-zinc-600'
-                      : 'bg-white hover:bg-violet-50/80 text-slate-700 hover:text-violet-700 border-slate-200/90 hover:border-violet-200 shadow-xs'
-                  }`}
+                  onClick={handleShuffleSuggestions}
+                  title="Shuffle suggestions"
+                  className="p-1 rounded-md text-zinc-400 hover:text-violet-400 hover:bg-violet-500/10 transition-colors"
                 >
-                  <span
-                    className={`w-1.5 h-1.5 rounded-full shrink-0 ${
-                      isNight ? 'bg-violet-400' : 'bg-violet-600'
-                    }`}
-                  />
-                  <span>{item.label}</span>
+                  <RotateCw className={`w-3 h-3 ${isRotating ? 'animate-spin' : ''}`} />
                 </button>
-              ))}
+                <button
+                  type="button"
+                  onClick={toggleSuggestions}
+                  title="Hide suggestions"
+                  className="p-1 rounded-md text-zinc-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Message Input Box with Mode-Adaptive Dynamic Placeholder */}
           <form
@@ -668,6 +806,20 @@ export const AIMentorChat = () => {
               isNight ? 'bg-[#18181F] border-[#27272A]' : 'bg-slate-50 border-slate-200'
             }`}
           >
+            {!showSuggestions && (
+              <button
+                type="button"
+                onClick={toggleSuggestions}
+                title="Show exploration suggestions"
+                className={`p-1.5 sm:p-2 rounded-lg text-violet-400 hover:bg-violet-500/15 border border-violet-500/20 transition-all shrink-0 flex items-center gap-1 ${
+                  isNight ? 'bg-zinc-900' : 'bg-white shadow-2xs'
+                }`}
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline text-[11px] font-medium">Prompts</span>
+              </button>
+            )}
+
             <input
               type="text"
               value={inputText}
