@@ -23,6 +23,8 @@ export const getApiKeys = () => {
     import.meta.env.VITE_GOOGLE_API_KEY ||
     import.meta.env.VITE_API_KEY ||
     import.meta.env.GEMINI_API_KEY ||
+    import.meta.env.GEMINI_KEY ||
+    import.meta.env.GOOGLE_API_KEY ||
     '';
 
   const secondaryEnv =
