@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useApp } from '../../context/AppContext';
 import logoNight from '../../assets/HabitPlus_Logo_Night.svg';
 import logoDay from '../../assets/HabitPlus_Logo_Day.svg';
@@ -10,10 +10,15 @@ export const EntranceScreen = ({ onFinish }) => {
   const [progress, setProgress] = useState(0);
   const [isFadingOut, setIsFadingOut] = useState(false);
 
+  const onFinishRef = useRef(onFinish);
   useEffect(() => {
-    // Smooth progress fill over ~3 seconds
-    const intervalTime = 30; // ms
-    const totalDuration = 2800; // ms
+    onFinishRef.current = onFinish;
+  });
+
+  useEffect(() => {
+    // Fast, crisp 1.5s - 2s entrance animation
+    const intervalTime = 20; // ms
+    const totalDuration = 1300; // ms to reach 100%
     const step = (intervalTime / totalDuration) * 100;
 
     const timer = setInterval(() => {
@@ -26,33 +31,38 @@ export const EntranceScreen = ({ onFinish }) => {
       });
     }, intervalTime);
 
-    // Trigger fade-out animation at 3 seconds
+    // Trigger smooth fade-out at 1.6s
     const fadeTimer = setTimeout(() => {
       setIsFadingOut(true);
-    }, 3100);
+    }, 1600);
 
-    // Complete and unmount at ~3.7 seconds
+    // Complete and unmount strictly at 2.0s
     const finishTimer = setTimeout(() => {
-      onFinish();
-    }, 3700);
+      if (onFinishRef.current) {
+        onFinishRef.current();
+      }
+    }, 2000);
 
     return () => {
       clearInterval(timer);
       clearTimeout(fadeTimer);
       clearTimeout(finishTimer);
     };
-  }, [onFinish]);
+  }, []); // Strictly empty dependency array so clock ticks never cancel timers!
 
-  const handleSkip = () => {
+  const handleDismiss = () => {
     setIsFadingOut(true);
     setTimeout(() => {
-      onFinish();
-    }, 300);
+      if (onFinishRef.current) {
+        onFinishRef.current();
+      }
+    }, 200);
   };
 
   return (
     <div
-      className={`fixed inset-0 z-50 flex flex-col items-center justify-center select-none transition-all duration-700 ease-out ${
+      onClick={handleDismiss}
+      className={`fixed inset-0 z-50 flex flex-col items-center justify-center select-none transition-all duration-700 ease-out cursor-pointer ${
         isFadingOut
           ? 'opacity-0 scale-105 pointer-events-none'
           : 'opacity-100 scale-100'
@@ -75,7 +85,7 @@ export const EntranceScreen = ({ onFinish }) => {
 
       {/* Top right Skip button */}
       <button
-        onClick={handleSkip}
+        onClick={handleDismiss}
         className={`absolute top-5 right-5 sm:top-7 sm:right-7 px-3 py-1.5 rounded-full text-[11px] sm:text-xs font-semibold tracking-wide transition-all z-20 cursor-pointer ${
           isNight
             ? 'bg-zinc-800/60 hover:bg-zinc-700/80 text-zinc-400 hover:text-white border border-zinc-700/50'

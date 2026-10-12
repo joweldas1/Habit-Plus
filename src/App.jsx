@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { ToastProvider } from './context/ToastContext';
 import { AppProvider, useApp } from './context/AppContext';
 import { ToastContainer } from './components/common/ToastContainer';
@@ -19,7 +19,7 @@ function MainAppShell() {
   const isNight = settings.theme === 'night';
   const mainRef = useRef(null);
 
-  // 3-4 second sleek entrance splash animation on entry
+  // Fast 1.8-2 second sleek entrance splash animation on entry
   const [showEntrance, setShowEntrance] = useState(() => {
     try {
       return sessionStorage.getItem('habitplus_entrance_seen') !== 'true';
@@ -28,14 +28,14 @@ function MainAppShell() {
     }
   });
 
-  const handleFinishEntrance = () => {
+  const handleFinishEntrance = useCallback(() => {
     try {
       sessionStorage.setItem('habitplus_entrance_seen', 'true');
     } catch {
       // ignore
     }
     setShowEntrance(false);
-  };
+  }, []);
 
   // Automatically reset scroll position to top whenever switching tabs to prevent glitching/stuck UI
   useEffect(() => {

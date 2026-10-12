@@ -17,6 +17,9 @@ const DEFAULT_SECONDARY = '';
 export const getApiKeys = () => {
   // Directly access environment variables statically so Vite bakes them in during production build
   const primaryEnv =
+    import.meta.env.VITE_GOOGLE_AI_STUDIO_KEY ||
+    import.meta.env.VITE_GOOGLE_STUDIO_KEY ||
+    import.meta.env.VITE_GOOGLE_CONSOLE_KEY ||
     import.meta.env.VITE_GEMINI_KEY_PRIMARY ||
     import.meta.env.VITE_GEMINI_API_KEY ||
     import.meta.env.VITE_GEMINI_KEY ||
@@ -25,13 +28,28 @@ export const getApiKeys = () => {
     import.meta.env.GEMINI_API_KEY ||
     import.meta.env.GEMINI_KEY ||
     import.meta.env.GOOGLE_API_KEY ||
+    import.meta.env.GOOGLE_AI_STUDIO_KEY ||
     '';
 
   const secondaryEnv =
+    import.meta.env.VITE_GOOGLE_CONSOLE_KEY ||
     import.meta.env.VITE_GEMINI_KEY_SECONDARY ||
     import.meta.env.VITE_GEMINI_KEY_BACKUP ||
     '';
-  
+
+  // Dynamic search across all import.meta.env properties for any string beginning with AIzaSy
+  let dynamicEnvKey = '';
+  try {
+    for (const val of Object.values(import.meta.env)) {
+      if (typeof val === 'string' && val.startsWith('AIzaSy') && val.length > 20) {
+        dynamicEnvKey = val;
+        break;
+      }
+    }
+  } catch {
+    // ignore
+  }
+
   // Also check if user set overrides in localStorage
   let stored = {};
   try {
@@ -42,7 +60,7 @@ export const getApiKeys = () => {
   }
 
   return {
-    primary: stored.primary || primaryEnv || DEFAULT_PRIMARY,
+    primary: stored.primary || primaryEnv || dynamicEnvKey || DEFAULT_PRIMARY,
     secondary: stored.secondary || secondaryEnv || DEFAULT_SECONDARY,
   };
 };
