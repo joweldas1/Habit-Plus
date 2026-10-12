@@ -10,6 +10,7 @@ import {
   CalendarDays,
   Sparkles,
   History,
+  Layers,
 } from 'lucide-react';
 import logoNight from '../../assets/HabitPlus_Logo_Night.svg';
 import logoDay from '../../assets/HabitPlus_Logo_Day.svg';
@@ -33,6 +34,7 @@ export const Header = () => {
 
   const navItems = [
     { id: 'dashboard', label: t.tabDashboard, icon: LayoutDashboard },
+    { id: 'tracker', label: t.tabTracker || 'Tracker', icon: Layers },
     { id: 'routine', label: t.tabRoutine, icon: CalendarDays },
     { id: 'mentor', label: t.tabMentor, icon: Sparkles },
     { id: 'history', label: t.tabHistory, icon: History },

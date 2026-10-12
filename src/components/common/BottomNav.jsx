@@ -1,13 +1,14 @@
 import React from 'react';
 import { useApp } from '../../context/AppContext';
-import { LayoutDashboard, CalendarDays, Sparkles, History } from 'lucide-react';
+import { LayoutDashboard, CalendarDays, Sparkles, History, Layers } from 'lucide-react';
 
 export const BottomNav = () => {
   const { activeTab, setActiveTab, t, settings } = useApp();
   const isNight = settings.theme === 'night';
 
   const tabs = [
-    { id: 'dashboard', label: t.tabDashboard, icon: LayoutDashboard },
+    { id: 'dashboard', label: t.tabDashboard || 'Home', icon: LayoutDashboard },
+    { id: 'tracker', label: t.tabTracker || 'Tracker', icon: Layers },
     { id: 'routine', label: t.tabRoutine, icon: CalendarDays },
     { id: 'mentor', label: t.tabMentor, icon: Sparkles },
     { id: 'history', label: t.tabHistory, icon: History },
@@ -15,13 +16,13 @@ export const BottomNav = () => {
 
   return (
     <nav
-      className={`fixed bottom-0 left-0 right-0 z-40 max-w-md mx-auto border-t backdrop-blur-xl px-1.5 py-1 transition-all duration-300 md:hidden ${
+      className={`fixed bottom-0 left-0 right-0 z-40 max-w-md mx-auto border-t backdrop-blur-xl px-1 py-1 transition-all duration-300 md:hidden ${
         isNight
           ? 'bg-[#09090B]/95 border-[#27272A] text-zinc-300'
           : 'bg-white/95 border-slate-200 text-slate-800 shadow-lg'
       }`}
     >
-      <div className="grid grid-cols-4 gap-1">
+      <div className="grid grid-cols-5 gap-0.5 sm:gap-1">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;

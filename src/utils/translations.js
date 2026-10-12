@@ -14,11 +14,17 @@ export const translations = {
     greetingEvening: "Good evening",
     
     // Tabs
-    tabDashboard: "Dashboard",
+    tabDashboard: "Home",
+    tabTracker: "Tracker",
     tabRoutine: "Routine",
     tabMentor: "AI Mentor",
     tabHistory: "History",
     tabSettings: "Settings",
+
+    // Tracker
+    trackerTitle: "Today's Habit Tracker",
+    trackerSub: "24-hour timeline, live focus countdowns, and completion logging.",
+    viewFullTracker: "View Full 24-Hour Timeline Tracker",
     
     // Dashboard
     todaysPoints: "Today's Points",
@@ -152,11 +158,17 @@ export const translations = {
     greetingEvening: "শুভ সন্ধ্যা",
     
     // Tabs
-    tabDashboard: "ড্যাশবোর্ড",
+    tabDashboard: "হোম",
+    tabTracker: "ট্র্যাকিং",
     tabRoutine: "রুটিন",
     tabMentor: "এআই মেন্টর",
     tabHistory: "হিস্ট্রি",
     tabSettings: "সেটিংস",
+
+    // Tracker
+    trackerTitle: "আজকের হ্যাবিট ট্র্যাকিং",
+    trackerSub: "২৪ ঘণ্টার টাইমলাইন, লাইভ কাউন্টডাউন ও টাস্ক কমপ্লিশন।",
+    viewFullTracker: "সম্পূর্ণ ২৪ ঘণ্টার টাইমলাইন ট্র্যাকিং দেখুন",
     
     // Dashboard
     todaysPoints: "আজকের পয়েন্ট",

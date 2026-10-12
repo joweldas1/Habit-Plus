@@ -1,21 +1,41 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { ToastProvider } from './context/ToastContext';
 import { AppProvider, useApp } from './context/AppContext';
 import { ToastContainer } from './components/common/ToastContainer';
 import { Header } from './components/common/Header';
 import { BottomNav } from './components/common/BottomNav';
 import { DashboardView } from './components/dashboard/DashboardView';
+import { DailyTrackerView } from './components/tracker/DailyTrackerView';
 import { RoutineManager } from './components/routine/RoutineManager';
 import { AIMentorChat } from './components/mentor/AIMentorChat';
 import { HistoryView } from './components/history/HistoryView';
 import { WelcomeModal } from './components/onboarding/WelcomeModal';
 import { SettingsModal } from './components/settings/SettingsModal';
 import { AIConnectionTestModal } from './components/settings/AIConnectionTestModal';
+import { EntranceScreen } from './components/common/EntranceScreen';
 
 function MainAppShell() {
   const { activeTab, settings, isSettingsOpen, setIsSettingsOpen, isAIConnectionTestOpen, setIsAIConnectionTestOpen } = useApp();
   const isNight = settings.theme === 'night';
   const mainRef = useRef(null);
+
+  // 3-4 second sleek entrance splash animation on entry
+  const [showEntrance, setShowEntrance] = useState(() => {
+    try {
+      return sessionStorage.getItem('habitplus_entrance_seen') !== 'true';
+    } catch {
+      return true;
+    }
+  });
+
+  const handleFinishEntrance = () => {
+    try {
+      sessionStorage.setItem('habitplus_entrance_seen', 'true');
+    } catch {
+      // ignore
+    }
+    setShowEntrance(false);
+  };
 
   // Automatically reset scroll position to top whenever switching tabs to prevent glitching/stuck UI
   useEffect(() => {
@@ -31,6 +51,9 @@ function MainAppShell() {
         isNight ? 'bg-[#09090B] text-[#F4F4F5]' : 'bg-[#E2E8F0] text-[#1E293B]'
       }`}
     >
+      {/* 3-4s Entrance Splash Animation */}
+      {showEntrance && <EntranceScreen onFinish={handleFinishEntrance} />}
+
       {/* Night mode soft radial ambient glow (purple-to-blue) framing content */}
       {isNight && (
         <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
@@ -55,6 +78,7 @@ function MainAppShell() {
           }`}
         >
           {activeTab === 'dashboard' && <DashboardView />}
+          {activeTab === 'tracker' && <DailyTrackerView />}
           {activeTab === 'routine' && <RoutineManager />}
           {activeTab === 'mentor' && <AIMentorChat />}
           {activeTab === 'history' && <HistoryView />}
