@@ -52,7 +52,7 @@ export const Header = () => {
           <img
             src={isNight ? logoNight : logoDay}
             alt="HabitPlus Logo"
-            className="h-7 sm:h-8 md:h-10 w-auto max-w-[130px] sm:max-w-[170px] md:max-w-[190px] object-contain"
+            className="h-[35px] sm:h-10 md:h-12 w-auto max-w-[155px] sm:max-w-[185px] md:max-w-[215px] object-contain"
           />
         </button>
 

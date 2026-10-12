@@ -51,7 +51,7 @@ export const WelcomeModal = () => {
               <img
                 src={logoNight}
                 alt="HabitPlus Logo"
-                className="h-11 sm:h-12 w-auto max-w-[210px] object-contain"
+                className="h-[52px] sm:h-[56px] w-auto max-w-[240px] object-contain"
               />
             </div>
 
