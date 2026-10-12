@@ -62,9 +62,15 @@ function MainAppShell() {
       )}
 
       {/* Responsive Wrapper Container: constrained to 100vh height */}
-      <div className="relative z-10 w-full max-w-md md:max-w-5xl lg:max-w-6xl xl:max-w-7xl mx-auto h-full max-h-full px-2.5 sm:px-4 md:px-8 pt-2 sm:pt-3 pb-1 md:pb-3 flex flex-col min-h-0 overflow-hidden">
+      <div
+        className={`relative z-10 w-full max-w-md md:max-w-5xl lg:max-w-6xl xl:max-w-7xl mx-auto h-full max-h-full flex flex-col min-h-0 overflow-hidden ${
+          activeTab === 'mentor'
+            ? 'px-1.5 sm:px-4 md:px-8 pt-1 sm:pt-2 md:pt-3 pb-0 md:pb-3'
+            : 'px-2.5 sm:px-4 md:px-8 pt-2 sm:pt-3 pb-1 md:pb-3'
+        }`}
+      >
         {/* Header - Fixed top */}
-        <div className="shrink-0 mb-1.5 sm:mb-2.5">
+        <div className={`shrink-0 ${activeTab === 'mentor' ? 'mb-1 sm:mb-2' : 'mb-1.5 sm:mb-2.5'}`}>
           <Header />
         </div>
 
@@ -73,7 +79,7 @@ function MainAppShell() {
           ref={mainRef}
           className={`flex-1 min-h-0 overflow-x-hidden pr-0.5 sm:pr-1 ${
             activeTab === 'mentor'
-              ? 'overflow-hidden flex flex-col pb-16 md:pb-1'
+              ? 'overflow-hidden flex flex-col pb-[50px] md:pb-1'
               : 'overflow-y-auto pb-16 md:pb-2'
           }`}
         >

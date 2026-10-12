@@ -377,7 +377,7 @@ export const AIMentorChat = () => {
   return (
     <div className="flex-1 min-h-0 flex flex-col animate-in fade-in duration-300">
       {/* Desktop/Laptop 2-Column Layout */}
-      <div className="flex flex-col md:flex-row gap-2 sm:gap-3 md:gap-4 flex-1 min-h-0">
+      <div className="flex flex-col md:flex-row gap-1.5 sm:gap-3 md:gap-4 flex-1 min-h-0">
         {/* Left Sidebar on Tablets & PC: Mode Selector & Prompt Recommendations */}
         <div className="md:w-72 lg:w-80 space-y-2 sm:space-y-3 shrink-0 flex flex-col md:overflow-y-auto pr-0 md:pr-1">
           {/* Header info (Desktop only to maximize mobile chat height) */}
@@ -413,7 +413,7 @@ export const AIMentorChat = () => {
               Select Coaching Domain
             </span>
 
-            <div className="grid grid-cols-3 md:grid-cols-1 gap-1.5 sm:gap-2">
+            <div className="grid grid-cols-3 md:grid-cols-1 gap-1 sm:gap-2">
                 {Object.entries(MODE_CONFIG).map(([key, config]) => {
                   const isSelected = mode === key;
                   const Icon = config.icon;
@@ -457,16 +457,16 @@ export const AIMentorChat = () => {
                       key={key}
                       type="button"
                       onClick={() => setMode(key)}
-                      className={`p-2 sm:p-3 rounded-xl sm:rounded-2xl border text-left transition-all duration-200 ${activeClass}`}
+                      className={`p-1.5 sm:p-2.5 md:p-3 rounded-lg sm:rounded-xl md:rounded-2xl border text-left transition-all duration-200 ${activeClass}`}
                     >
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-1.5 sm:space-x-2 min-w-0">
+                        <div className="flex items-center space-x-1 sm:space-x-2 min-w-0">
                           <Icon className={`w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0 ${iconColor}`} />
-                          <span className="font-bold text-[11px] sm:text-xs md:text-sm truncate">{config.title}</span>
+                          <span className="font-bold text-[10.5px] sm:text-xs md:text-sm truncate">{config.title}</span>
                         </div>
                         {count > 1 && (
                           <span
-                            className={`text-[9px] sm:text-[10px] px-1.5 py-0.2 rounded-full font-mono shrink-0 ml-1 ${
+                            className={`text-[8.5px] sm:text-[10px] px-1 py-0.2 rounded-full font-mono shrink-0 ml-1 ${
                               isSelected
                                 ? 'bg-white/20 text-white'
                                 : isNight
@@ -539,17 +539,17 @@ export const AIMentorChat = () => {
         >
           {/* Header of Active Conversation */}
           <div
-            className={`px-3 sm:px-4 py-2 sm:py-2.5 border-b flex items-center justify-between transition-colors shrink-0 ${
+            className={`px-2.5 sm:px-4 py-1.5 sm:py-2 border-b flex items-center justify-between transition-colors shrink-0 ${
               isNight ? 'bg-[#16161D] border-zinc-800/80' : 'bg-slate-50/80 border-slate-200'
             }`}
           >
-            <div className="flex items-center space-x-2">
-              <currentConfig.icon className="w-4 h-4 text-violet-500" />
-              <span className="text-xs font-bold tracking-tight">{currentConfig.title} Thread</span>
+            <div className="flex items-center space-x-1.5 sm:space-x-2">
+              <currentConfig.icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-violet-500" />
+              <span className="text-[11px] sm:text-xs font-bold tracking-tight">{currentConfig.title} Thread</span>
             </div>
-            <div className="flex items-center space-x-2">
-              <span className="text-[11px] text-zinc-400 font-mono">
-                {activeMessages.length} {activeMessages.length === 1 ? 'message' : 'messages'}
+            <div className="flex items-center space-x-1.5 sm:space-x-2">
+              <span className="text-[10px] sm:text-[11px] text-zinc-400 font-mono">
+                {activeMessages.length} {activeMessages.length === 1 ? 'msg' : 'messages'}
               </span>
               <button
                 type="button"
@@ -563,26 +563,26 @@ export const AIMentorChat = () => {
           </div>
 
           {/* Messages Scroll Area for this specific mode */}
-          <div ref={messagesContainerRef} className="flex-1 min-h-0 p-2.5 sm:p-4 overflow-y-auto space-y-2.5 sm:space-y-3.5">
+          <div ref={messagesContainerRef} className="flex-1 min-h-0 p-2 sm:p-3.5 overflow-y-auto space-y-2 sm:space-y-3">
             {activeMessages.map((m) => {
               const isUser = m.sender === 'user';
               return (
                 <div
                   key={m.id}
-                  className={`flex items-start space-x-2 sm:space-x-2.5 ${
+                  className={`flex items-start space-x-1.5 sm:space-x-2.5 ${
                     isUser ? 'flex-row-reverse space-x-reverse' : 'flex-row'
                   }`}
                 >
                   <div
                     title={isUser ? (settings.name || 'You') : 'AI Mentor'}
-                    className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl flex items-center justify-center shrink-0 text-xs shadow-md select-none transition-all ${
+                    className={`w-6 h-6 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl flex items-center justify-center shrink-0 text-xs shadow-md select-none transition-all ${
                       isUser
                         ? 'bg-gradient-to-tr from-violet-600 to-indigo-500 text-white font-extrabold ring-1 ring-white/10'
                         : 'bg-zinc-800 text-[#38BDF8] border border-zinc-700'
                     }`}
                   >
                     {isUser ? (
-                      <span className="font-extrabold text-[11px] sm:text-xs uppercase leading-none">
+                      <span className="font-extrabold text-[10px] sm:text-xs uppercase leading-none">
                         {userInitial}
                       </span>
                     ) : (
@@ -590,17 +590,24 @@ export const AIMentorChat = () => {
                     )}
                   </div>
 
-                  <div
-                    className={`max-w-[88%] md:max-w-[75%] rounded-xl sm:rounded-2xl p-2.5 sm:p-3.5 text-xs sm:text-sm leading-relaxed ${
-                      isUser
-                        ? 'bg-[#8B5CF6] text-white rounded-tr-sm shadow-md'
-                        : isNight
-                        ? 'bg-[#181820] border border-[#27272A] text-zinc-200 rounded-tl-sm'
-                        : 'bg-slate-100 border border-slate-200 text-slate-800 rounded-tl-sm'
-                    }`}
-                  >
-                    <FormattedMessage text={m.text} isNight={isNight} isUser={isUser} />
-                    <span className="text-[9.5px] sm:text-[10px] opacity-60 block mt-1 text-right font-mono">
+                  {/* Message bubble with timestamp placed outside underneath */}
+                  <div className={`flex flex-col ${isUser ? 'items-end' : 'items-start'} max-w-[88%] sm:max-w-[80%] md:max-w-[75%]`}>
+                    <div
+                      className={`rounded-xl sm:rounded-2xl px-3 py-2 sm:px-3.5 sm:py-2.5 text-xs sm:text-sm leading-relaxed ${
+                        isUser
+                          ? 'bg-[#8B5CF6] text-white rounded-tr-xs shadow-md'
+                          : isNight
+                          ? 'bg-[#181820] border border-[#27272A] text-zinc-200 rounded-tl-xs'
+                          : 'bg-slate-100 border border-slate-200 text-slate-800 rounded-tl-xs'
+                      }`}
+                    >
+                      <FormattedMessage text={m.text} isNight={isNight} isUser={isUser} />
+                    </div>
+                    <span
+                      className={`text-[9.5px] sm:text-[10px] font-mono mt-0.5 px-1 ${
+                        isNight ? 'text-zinc-500' : 'text-slate-400'
+                      }`}
+                    >
                       {m.timestamp}
                     </span>
                   </div>
@@ -609,8 +616,8 @@ export const AIMentorChat = () => {
             })}
 
             {loading && (
-              <div className="flex items-center space-x-2 text-xs text-zinc-400 italic p-2">
-                <Loader2 className="w-4 h-4 animate-spin text-[#8B5CF6]" />
+              <div className="flex items-center space-x-2 text-xs text-zinc-400 italic p-1.5 sm:p-2">
+                <Loader2 className="w-3.5 h-3.5 animate-spin text-[#8B5CF6]" />
                 <span>{t.thinking}</span>
               </div>
             )}
@@ -618,23 +625,23 @@ export const AIMentorChat = () => {
 
           {/* Quick Suggestion Chips Strip (Hidden scrollbar, luxury styling) */}
           <div
-            className={`px-2.5 py-1.5 sm:px-3 sm:py-2 border-t flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar transition-colors ${
+            className={`px-2 py-1 sm:px-3 sm:py-1.5 border-t flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar transition-colors shrink-0 ${
               isNight ? 'bg-[#141418] border-zinc-800/80' : 'bg-slate-50/90 border-slate-200/90'
             }`}
           >
-            <span className="text-[9.5px] sm:text-[10px] uppercase font-bold tracking-wider text-zinc-400 shrink-0 flex items-center gap-1 pl-0.5">
-              <Sparkles className="w-3 h-3 text-violet-400" />
+            <span className="text-[9px] sm:text-[10px] uppercase font-bold tracking-wider text-zinc-400 shrink-0 flex items-center gap-1 pl-0.5">
+              <Sparkles className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-violet-400" />
               <span className="hidden sm:inline">Suggestions:</span>
             </span>
 
-            <div className="flex items-center gap-1.5 flex-nowrap shrink-0">
+            <div className="flex items-center gap-1 sm:gap-1.5 flex-nowrap shrink-0">
               {currentConfig.suggestions.map((item, i) => (
                 <button
                   key={i}
                   type="button"
                   onClick={() => handleSend(item.prompt)}
                   title={item.prompt}
-                  className={`text-[11px] sm:text-xs font-semibold whitespace-nowrap px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full border transition-all active:scale-95 flex items-center gap-1.5 cursor-pointer shadow-2xs ${
+                  className={`text-[10px] sm:text-xs font-semibold whitespace-nowrap px-2 py-0.5 sm:px-3 sm:py-1 rounded-full border transition-all active:scale-95 flex items-center gap-1 cursor-pointer shadow-2xs ${
                     isNight
                       ? 'bg-zinc-900/90 hover:bg-zinc-800 text-zinc-200 hover:text-white border-zinc-700/70 hover:border-zinc-600'
                       : 'bg-white hover:bg-violet-50/80 text-slate-700 hover:text-violet-700 border-slate-200/90 hover:border-violet-200 shadow-xs'
@@ -657,7 +664,7 @@ export const AIMentorChat = () => {
               e.preventDefault();
               handleSend();
             }}
-            className={`shrink-0 p-2 sm:p-3 border-t flex items-center space-x-2 sm:space-x-2.5 ${
+            className={`shrink-0 p-1.5 sm:p-2.5 md:p-3 border-t flex items-center space-x-1.5 sm:space-x-2.5 ${
               isNight ? 'bg-[#18181F] border-[#27272A]' : 'bg-slate-50 border-slate-200'
             }`}
           >
@@ -667,7 +674,7 @@ export const AIMentorChat = () => {
               onChange={(e) => setInputText(e.target.value)}
               placeholder={currentConfig.placeholder}
               disabled={loading}
-              className={`flex-1 px-3 py-2 sm:px-4 sm:py-3 rounded-lg sm:rounded-xl text-xs sm:text-sm focus:outline-none transition-colors ${
+              className={`flex-1 px-2.5 py-1.5 sm:px-4 sm:py-2.5 rounded-lg sm:rounded-xl text-xs sm:text-sm focus:outline-none transition-colors ${
                 isNight
                   ? 'bg-zinc-900 border border-zinc-700 text-white placeholder-zinc-500 focus:border-[#8B5CF6]'
                   : 'bg-white border border-slate-300 text-slate-900 placeholder-slate-400 focus:border-[#8B5CF6]'
@@ -677,9 +684,9 @@ export const AIMentorChat = () => {
             <button
               type="submit"
               disabled={!inputText.trim() || loading}
-              className="p-2 sm:p-3 rounded-lg sm:rounded-xl bg-[#8B5CF6] hover:bg-[#7C3AED] disabled:opacity-40 text-white shadow-md active:scale-95 transition-all shrink-0"
+              className="p-1.5 sm:p-2.5 md:p-3 rounded-lg sm:rounded-xl bg-[#8B5CF6] hover:bg-[#7C3AED] disabled:opacity-40 text-white shadow-md active:scale-95 transition-all shrink-0"
             >
-              <Send className="w-4 h-4" />
+              <Send className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </button>
           </form>
         </div>
