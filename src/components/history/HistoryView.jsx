@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { AnalyticsChart } from './AnalyticsChart';
 import { DayDetailModal } from './DayDetailModal';
+import { InstallBanner } from '../common/InstallBanner';
 import {
   ShieldCheck,
   Award,
@@ -183,6 +184,9 @@ export const HistoryView = () => {
           )}
         </div>
       </div>
+
+      {/* Install HabitPlus PWA Banner on Last Page */}
+      <InstallBanner />
 
       {/* Day Detail Modal */}
       <DayDetailModal

@@ -50,7 +50,7 @@ function MainAppShell() {
           ref={mainRef}
           className={`flex-1 min-h-0 overflow-x-hidden pr-0.5 sm:pr-1 ${
             activeTab === 'mentor'
-              ? 'overflow-y-hidden flex flex-col h-full pb-14 md:pb-2'
+              ? 'overflow-hidden flex flex-col pb-16 md:pb-1'
               : 'overflow-y-auto pb-16 md:pb-2'
           }`}
         >

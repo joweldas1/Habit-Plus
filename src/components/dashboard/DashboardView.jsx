@@ -5,11 +5,10 @@ import { MetricsSummary } from './MetricsSummary';
 import { TaskTimelineCard } from './TaskTimelineCard';
 import { LiveFocusSpotlight } from './LiveFocusSpotlight';
 import { CoverageBar } from '../routine/CoverageBar';
-import { InstallBanner } from '../common/InstallBanner';
 import { ListFilter, CalendarPlus } from 'lucide-react';
 
 export const DashboardView = () => {
-  const { dailyTasks, routine, setActiveTab, t, isStandalone, settings } = useApp();
+  const { dailyTasks, routine, setActiveTab, t, settings } = useApp();
   const isNight = settings.theme === 'night';
 
   return (
@@ -18,7 +17,6 @@ export const DashboardView = () => {
       <div className="grid grid-cols-1 md:grid-cols-12 gap-3 sm:gap-4 md:gap-6 items-start">
         {/* Left Column (Sticky Sidebar on Tablet/Laptop/PC): Live Clock, Gauges & 24h Coverage */}
         <div className="md:col-span-5 lg:col-span-4 space-y-3 sm:space-y-4 md:sticky md:top-0">
-          {!isStandalone && <InstallBanner />}
           <LiveClock />
           <MetricsSummary />
           {/* 24-Hour Coverage Meter on Dashboard */}

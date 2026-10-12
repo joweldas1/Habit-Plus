@@ -380,46 +380,45 @@ export const AIMentorChat = () => {
   };
 
   return (
-    <div className="h-full min-h-0 flex flex-col flex-1 animate-in fade-in duration-300">
+    <div className="flex-1 min-h-0 flex flex-col animate-in fade-in duration-300">
       {/* Desktop/Laptop 2-Column Layout */}
-      <div className="flex flex-col md:flex-row gap-2.5 sm:gap-3 md:gap-4 flex-1 min-h-0 h-full items-stretch">
+      <div className="flex flex-col md:flex-row gap-2 sm:gap-3 md:gap-4 flex-1 min-h-0">
         {/* Left Sidebar on Tablets & PC: Mode Selector & Prompt Recommendations */}
-        <div className="md:w-80 lg:w-96 space-y-2.5 sm:space-y-3 md:space-y-4 shrink-0 flex flex-col justify-between md:overflow-y-auto pr-0 md:pr-1">
-          <div className="space-y-4">
-            {/* Header info */}
-            <div
-              className={`p-3 sm:p-4 rounded-xl sm:rounded-2xl border ${
-                isNight ? 'bg-[#141418] border-[#27272A]' : 'bg-white border-slate-200 shadow-sm'
-              }`}
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2 sm:space-x-2.5">
-                  <div className="p-2 sm:p-2.5 rounded-lg sm:rounded-xl bg-purple-500/20 text-[#8B5CF6]">
-                    <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />
-                  </div>
-                  <div>
-                    <h3 className="text-xs sm:text-sm md:text-base font-bold tracking-tight">{t.mentorTitle}</h3>
-                    <p className="text-[10px] sm:text-[11px] text-zinc-400">{t.mentorSub}</p>
-                  </div>
+        <div className="md:w-72 lg:w-80 space-y-2 sm:space-y-3 shrink-0 flex flex-col md:overflow-y-auto pr-0 md:pr-1">
+          {/* Header info (Desktop only to maximize mobile chat height) */}
+          <div
+            className={`hidden md:block p-3 sm:p-4 rounded-xl sm:rounded-2xl border ${
+              isNight ? 'bg-[#141418] border-[#27272A]' : 'bg-white border-slate-200 shadow-sm'
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2 sm:space-x-2.5">
+                <div className="p-2 sm:p-2.5 rounded-lg sm:rounded-xl bg-purple-500/20 text-[#8B5CF6]">
+                  <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />
                 </div>
-
-                <button
-                  onClick={handleClear}
-                  title={`${t.clearChat} (${currentConfig.title})`}
-                  className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl text-zinc-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
-                >
-                  <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                </button>
+                <div>
+                  <h3 className="text-xs sm:text-sm md:text-base font-bold tracking-tight">{t.mentorTitle}</h3>
+                  <p className="text-[10px] sm:text-[11px] text-zinc-400">{t.mentorSub}</p>
+                </div>
               </div>
+
+              <button
+                onClick={handleClear}
+                title={`${t.clearChat} (${currentConfig.title})`}
+                className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl text-zinc-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
+              >
+                <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              </button>
             </div>
+          </div>
 
-            {/* 3 Modes Cards - Individual Conversation Boxes */}
-            <div className="space-y-1.5 sm:space-y-2">
-              <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-zinc-400 px-1">
-                Select Coaching Domain
-              </span>
+          {/* 3 Modes Cards - Individual Conversation Boxes */}
+          <div className="space-y-1 sm:space-y-1.5">
+            <span className="hidden md:block text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-zinc-400 px-1">
+              Select Coaching Domain
+            </span>
 
-              <div className="grid grid-cols-3 md:grid-cols-1 gap-1.5 sm:gap-2.5">
+            <div className="grid grid-cols-3 md:grid-cols-1 gap-1.5 sm:gap-2">
                 {Object.entries(MODE_CONFIG).map(([key, config]) => {
                   const isSelected = mode === key;
                   const Icon = config.icon;
@@ -523,10 +522,15 @@ export const AIMentorChat = () => {
                 ))}
               </div>
             </div>
-          </div>
 
-          {/* Context Lock Banner */}
-          <div className="hidden md:flex items-start space-x-2 p-3 rounded-2xl bg-purple-950/20 border border-purple-500/20 text-purple-300 text-[11px]">
+          {/* Context Lock Banner (High contrast in day mode, sleek in night mode) */}
+          <div
+            className={`hidden md:flex items-start space-x-2 p-2.5 rounded-xl border text-[11px] leading-relaxed ${
+              isNight
+                ? 'bg-purple-950/25 border-purple-500/20 text-purple-300'
+                : 'bg-purple-50 border-purple-200 text-purple-900 font-medium'
+            }`}
+          >
             <ShieldCheck className="w-4 h-4 text-[#8B5CF6] shrink-0 mt-0.5" />
             <span>Strict context lock: AI mentor exclusively assists with habits, English & discipline.</span>
           </div>
@@ -534,13 +538,13 @@ export const AIMentorChat = () => {
 
         {/* Right Main Chat Terminal (Fits seamlessly within 100vh layout) */}
         <div
-          className={`flex-1 min-h-0 flex flex-col rounded-2xl border overflow-hidden transition-all duration-300 ${
+          className={`flex-1 min-h-0 flex flex-col rounded-xl sm:rounded-2xl border overflow-hidden transition-all duration-300 ${
             isNight ? 'bg-[#141418] border-[#27272A]' : 'bg-white border-slate-200 shadow-sm'
           }`}
         >
           {/* Header of Active Conversation */}
           <div
-            className={`px-4 py-2.5 border-b flex items-center justify-between transition-colors shrink-0 ${
+            className={`px-3 sm:px-4 py-2 sm:py-2.5 border-b flex items-center justify-between transition-colors shrink-0 ${
               isNight ? 'bg-[#16161D] border-zinc-800/80' : 'bg-slate-50/80 border-slate-200'
             }`}
           >
@@ -548,9 +552,19 @@ export const AIMentorChat = () => {
               <currentConfig.icon className="w-4 h-4 text-violet-500" />
               <span className="text-xs font-bold tracking-tight">{currentConfig.title} Thread</span>
             </div>
-            <span className="text-[11px] text-zinc-400 font-mono">
-              {activeMessages.length} {activeMessages.length === 1 ? 'message' : 'messages'}
-            </span>
+            <div className="flex items-center space-x-2">
+              <span className="text-[11px] text-zinc-400 font-mono">
+                {activeMessages.length} {activeMessages.length === 1 ? 'message' : 'messages'}
+              </span>
+              <button
+                type="button"
+                onClick={handleClear}
+                title={`${t.clearChat} (${currentConfig.title})`}
+                className="p-1 sm:p-1.5 rounded-lg text-zinc-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+            </div>
           </div>
 
           {/* Missing API Key Setup Banner */}
@@ -673,7 +687,7 @@ export const AIMentorChat = () => {
               e.preventDefault();
               handleSend();
             }}
-            className={`p-2 sm:p-3.5 border-t flex items-center space-x-2 sm:space-x-2.5 ${
+            className={`shrink-0 p-2 sm:p-3 border-t flex items-center space-x-2 sm:space-x-2.5 ${
               isNight ? 'bg-[#18181F] border-[#27272A]' : 'bg-slate-50 border-slate-200'
             }`}
           >

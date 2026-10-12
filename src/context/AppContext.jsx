@@ -73,7 +73,17 @@ export const AppProvider = ({ children }) => {
 
   // PWA BeforeInstallPrompt listener & standalone detection
   useEffect(() => {
-    const checkStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+    let isPwaInstalled = false;
+    try {
+      const stored = localStorage.getItem('habitplus_pwa_installed');
+      if (stored === 'true') isPwaInstalled = true;
+    } catch {
+      // ignore
+    }
+    const checkStandalone =
+      window.matchMedia('(display-mode: standalone)').matches ||
+      window.navigator.standalone ||
+      isPwaInstalled;
     setIsStandalone(!!checkStandalone);
 
     const handler = (e) => {
@@ -82,7 +92,21 @@ export const AppProvider = ({ children }) => {
     };
     window.addEventListener('beforeinstallprompt', handler);
 
-    return () => window.removeEventListener('beforeinstallprompt', handler);
+    const installedHandler = () => {
+      try {
+        localStorage.setItem('habitplus_pwa_installed', 'true');
+      } catch {
+        // ignore
+      }
+      setIsStandalone(true);
+      setInstallPromptEvent(null);
+    };
+    window.addEventListener('appinstalled', installedHandler);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handler);
+      window.removeEventListener('appinstalled', installedHandler);
+    };
   }, []);
 
   // Live Clock Tick (every second)

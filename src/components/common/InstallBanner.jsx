@@ -1,28 +1,76 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
-import { Download, Share2, PlusSquare } from 'lucide-react';
+import { useToast } from '../../context/ToastContext';
+import { Download, Share2, PlusSquare, X } from 'lucide-react';
 import { Modal } from './Modal';
 
 export const InstallBanner = ({ compact = false }) => {
   const { installPromptEvent, isStandalone, t, settings } = useApp();
+  const { showToast } = useToast();
   const [showIosGuide, setShowIosGuide] = useState(false);
+  const [isInstalledOrDismissed, setIsInstalledOrDismissed] = useState(() => {
+    try {
+      return (
+        localStorage.getItem('habitplus_pwa_installed') === 'true' ||
+        localStorage.getItem('habitplus_install_dismissed') === 'true'
+      );
+    } catch {
+      return false;
+    }
+  });
+
   const isNight = settings.theme === 'night';
 
-  // If already running standalone as PWA, don't show install button
-  if (isStandalone) return null;
+  useEffect(() => {
+    const handleAppInstalled = () => {
+      try {
+        localStorage.setItem('habitplus_pwa_installed', 'true');
+      } catch {
+        // ignore
+      }
+      setIsInstalledOrDismissed(true);
+      showToast('HabitPlus successfully installed!', 'success');
+    };
+
+    window.addEventListener('appinstalled', handleAppInstalled);
+    return () => window.removeEventListener('appinstalled', handleAppInstalled);
+  }, [showToast]);
+
+  // If already running standalone or installed or dismissed, completely remove from UI!
+  if (isStandalone || isInstalledOrDismissed) return null;
 
   const handleInstallClick = async () => {
     if (installPromptEvent) {
       // Android / Chrome direct prompt
-      installPromptEvent.prompt();
-      const choiceResult = await installPromptEvent.userChoice;
-      if (choiceResult.outcome === 'accepted') {
-        console.log('User accepted the PWA install');
+      try {
+        installPromptEvent.prompt();
+        const choiceResult = await installPromptEvent.userChoice;
+        if (choiceResult && choiceResult.outcome === 'accepted') {
+          try {
+            localStorage.setItem('habitplus_pwa_installed', 'true');
+          } catch {
+            // ignore
+          }
+          setIsInstalledOrDismissed(true);
+          showToast('HabitPlus successfully installed!', 'success');
+        }
+      } catch (err) {
+        console.warn('Install prompt error:', err);
       }
     } else {
       // iOS Safari or browser without beforeinstallprompt
       setShowIosGuide(true);
     }
+  };
+
+  const handleDismiss = (e) => {
+    e.stopPropagation();
+    try {
+      localStorage.setItem('habitplus_install_dismissed', 'true');
+    } catch {
+      // ignore
+    }
+    setIsInstalledOrDismissed(true);
   };
 
   return (
@@ -54,16 +102,31 @@ export const InstallBanner = ({ compact = false }) => {
           </div>
         </div>
 
-        <button
-          onClick={handleInstallClick}
-          className={`shrink-0 px-2.5 py-1.5 sm:px-3.5 sm:py-2 rounded-lg sm:rounded-xl text-[11px] sm:text-xs font-semibold whitespace-nowrap shadow-sm active:scale-95 transition-all ${
-            isNight
-              ? 'bg-violet-600 hover:bg-violet-500 text-white'
-              : 'bg-slate-900 hover:bg-slate-800 text-white'
-          }`}
-        >
-          {t.installButton}
-        </button>
+        <div className="flex items-center space-x-1.5 sm:space-x-2 shrink-0">
+          <button
+            onClick={handleInstallClick}
+            className={`px-2.5 py-1.5 sm:px-3.5 sm:py-2 rounded-lg sm:rounded-xl text-[11px] sm:text-xs font-semibold whitespace-nowrap shadow-sm active:scale-95 transition-all ${
+              isNight
+                ? 'bg-violet-600 hover:bg-violet-500 text-white'
+                : 'bg-slate-900 hover:bg-slate-800 text-white'
+            }`}
+          >
+            {t.installButton}
+          </button>
+
+          <button
+            onClick={handleDismiss}
+            aria-label="Dismiss banner"
+            title="Dismiss"
+            className={`p-1.5 rounded-lg transition-colors ${
+              isNight
+                ? 'text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800/80'
+                : 'text-slate-400 hover:text-slate-700 hover:bg-slate-100'
+            }`}
+          >
+            <X className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+          </button>
+        </div>
       </div>
 
       {/* iOS Safari Step-by-Step Instructions Modal */}
